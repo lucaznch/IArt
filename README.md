@@ -15,10 +15,10 @@ A [Figura 1a](media/) mostra um exemplo da disposição inicial de uma grelha. A
 **Podemos assumir que uma instância de *Pipe Mania* tem uma solução única**.<br>
 As imagens que constam no enunciado foram obtidas a partir da aplicação Pipes PuzzleSet desenvolvida por Denis Pushkarev para IOS 2 e Android 3.
 
-[Figura 1a](media/initial-state.png): Estado inicial
+![Figura 1a](media/initial-state.png): Estado inicial
 <br>
 <br>
-[Figura 1b](media/goal-and-solution.png): Objetivo/Solução
+![Figura 1b](media/goal-and-solution.png): Objetivo/Solução
 <br>
 <br>
 
@@ -44,39 +44,39 @@ A título de exemplo, as peças da primeira linha da [Figura 1a](media/pieces/) 
 Figura 2: Designações para as peças de *Pipe Mania*
 <br>
 
-[FC](media/pieces/FC.png)
+![FC](media/pieces/FC.png)
 
-[FB](media/pieces/FB.png)
+![FB](media/pieces/FB.png)
 
-[FE](media/pieces/FE.png)
+![FE](media/pieces/FE.png)
 
-[FD](media/pieces/FD.png)
+![FD](media/pieces/FD.png)
 <br>
 <br>
 
-[BC](media/pieces/BC.png)
+![BC](media/pieces/BC.png)
 
-[BB](media/pieces/BB.png)
+![BB](media/pieces/BB.png)
 
-[BE](media/pieces/BE.png)
+![BE](media/pieces/BE.png)
 
-[BD](media/pieces/BD.png)
+![BD](media/pieces/BD.png)
 <br>
 <br>
 
-[VC](media/pieces/VC.png)
+![VC](media/pieces/VC.png)
 
-[VB](media/pieces/VB.png)
+![VB](media/pieces/VB.png)
 
-[VE](media/pieces/VE.png)
+![VE](media/pieces/VE.png)
 
-[VD](media/pieces/VD.png)
+![VD](media/pieces/VD.png)
 <br>
 <br>
 
-[LH](media/pieces/LH.png)
+![LH](media/pieces/LH.png)
 
-[LV](media/pieces/LV.png)
+![LV](media/pieces/LV.png)
 <br>
 <br>
 
