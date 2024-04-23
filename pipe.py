@@ -110,4 +110,12 @@ if __name__ == "__main__":
     # Usar uma técnica de procura para resolver a instância,
     # Retirar a solução a partir do nó resultante,
     # Imprimir para o standard output no formato indicado.
-    pass
+    
+	if len(sys.argv) != 2:
+    print("Usage: python3 program.py <file.txt>")
+    sys.exit(1)
+
+	file_name = sys.argv[1]
+	print("file containing initial state: " + file_name)
+
+	pass
