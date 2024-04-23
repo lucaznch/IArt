@@ -1,10 +1,6 @@
-# pipe.py: Template para implementação do projeto de Inteligência Artificial 2023/2024.
-# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
-# Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
-
-# Grupo 00:
-# 00000 Nome1
-# 00000 Nome2
+# Grupo 15:
+# 102637 Gabriel Silva
+# 105994 Jorge Mendes
 
 import sys
 from search import (
@@ -29,93 +25,108 @@ class PipeManiaState:
     def __lt__(self, other):
         return self.id < other.id
 
-    # TODO: outros metodos da classe
+    # TODO: more methods?
 
 
 class Board:
-    """Representação interna de um tabuleiro de PipeMania."""
+    """Internal representation of a PipeMania board."""
+
+    def __init__(self, board, len):
+        self.board = board
+        self.len = len
 
     def get_value(self, row: int, col: int) -> str:
-        """Devolve o valor na respetiva posição do tabuleiro."""
+        """Returns the value at the respective position on the board."""
         # TODO
         pass
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        """Devolve os valores imediatamente acima e abaixo,
-        respectivamente."""
+    def get_len(self):
+        return self.len
+
+    def get_board(self):
+        """Returns the board. The board is a list of lists. Each list represents a row of the board."""
+        # example: [['VB', 'VE'], ['FC', 'FC']]
+        return self.board
+    
+    def get_board_display(self):
+        for i in range(self.len):
+            for j in range(self.len):
+                if j == self.len - 1:
+                    print(self.board[i][j])
+                else:
+                    print(self.board[i][j] + "\t", end='')
+        
+
+    def adjacent_vertical_values(self, row: int, col: int) -> tuple[str, str]:
+        """Returns the values immediately above and below, respectively."""
         # TODO
         pass
 
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        """Devolve os valores imediatamente à esquerda e à direita,
-        respectivamente."""
+    def adjacent_horizontal_values(self, row: int, col: int) -> tuple[str, str]:
+        """Returns the values immediately to the left and right, respectively."""
         # TODO
         pass
 
     @staticmethod
     def parse_instance():
-        """Lê o test do standard input (stdin) que é passado como argumento
-        e retorna uma instância da classe Board.
+        n = 0
+        matrix = []
+        file = sys.argv[1]
 
-        Por exemplo:
-            $ python3 pipe.py < test-01.txt
+        with open(file, 'r') as file:
+            for line in file:
+                row = line.split()
+                matrix.append(row)
+                n += 1
+    
+        return Board(matrix, n)
 
-            > from sys import stdin
-            > line = stdin.readline().split()
-        """
-        # TODO
-        pass
 
-    # TODO: outros metodos da classe
+
 
 
 class PipeMania(Problem):
     def __init__(self, board: Board):
-        """O construtor especifica o estado inicial."""
+        """The constructor specifies the initial state."""
         # TODO
         pass
 
     def actions(self, state: PipeManiaState):
-        """Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento."""
+        """Returns a list of actions that can be performed from the state passed as an argument."""
         # TODO
         pass
 
     def result(self, state: PipeManiaState, action):
-        """Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state)."""
+        """Returns the state resulting from executing the 'action' on 'state' passed as an argument.
+        The action to be executed must be one of those present in the list obtained by executing self.actions(state)."""
         # TODO
         pass
 
     def goal_test(self, state: PipeManiaState):
-        """Retorna True se e só se o estado passado como argumento é
-        um estado objetivo. Deve verificar se todas as posições do tabuleiro
-        estão preenchidas de acordo com as regras do problema."""
+        """Returns True if and only if the state passed as an argument is an objective state.
+        You must check that all positions on the board are filled according to the rules of the problem."""
         # TODO
         pass
 
     def h(self, node: Node):
-        """Função heuristica utilizada para a procura A*."""
+        """Heuristic function used for the A* search."""
         # TODO
         pass
 
-    # TODO: outros metodos da classe
+    # TODO: more methods?
 
 
 if __name__ == "__main__":
     # TODO:
-    # Ler o ficheiro do standard input,
-    # Usar uma técnica de procura para resolver a instância,
-    # Retirar a solução a partir do nó resultante,
-    # Imprimir para o standard output no formato indicado.
-    
-	if len(sys.argv) != 2:
-    print("Usage: python3 program.py <file.txt>")
-    sys.exit(1)
+    # Read the standard input file,
+    # Use a search technique to resolve the instance,
+    # Remove the solution from the resulting node,
+    # Print to standard output in the indicated format.
 
-	file_name = sys.argv[1]
-	print("file containing initial state: " + file_name)
 
-	pass
+    if len(sys.argv) != 2:
+        print("Usage: python3 program.py <initial-state.txt>")
+        sys.exit(1)
+
+    board = Board.parse_instance()
+    board.get_board_display()
