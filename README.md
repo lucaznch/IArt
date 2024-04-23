@@ -13,7 +13,6 @@ O jogo *Pipe Mania* decorre numa grelha quadrada, em que cada posição contém 
 O objetivo é rodar as peças de modo a que todas fiquem conectadas e a água possa circular sem fugas.<br>
 A [Figura 1a](#figura-1a-estado-inicial) mostra um exemplo da disposição inicial de uma grelha. A [Figura 1b](#figura-1b-objetivosolução) mostra uma solução para essa mesma grelha.<br>
 **Podemos assumir que uma instância de *Pipe Mania* tem uma solução única**.<br>
-As imagens que constam no enunciado foram obtidas a partir da aplicação Pipes PuzzleSet desenvolvida por Denis Pushkarev para IOS 2 e Android 3.
 
 ##### Figura 1a: Estado inicial
 ![Figura 1a](media/initial-state.png)
@@ -26,21 +25,20 @@ As imagens que constam no enunciado foram obtidas a partir da aplicação Pipes 
 
 ## 3 Objetivo
 O objetivo deste projeto é o desenvolvimento de um programa em Python 3.8.2 que, dada uma instância de *Pipe Mani*a, retorna a solução (única), i.e., todos os tubos conectados e sem fugas.
-O programa deve ser desenvolvido num ficheiro pipe.py, que lê uma instância de *Pipe Mania* a partir do standard input no formato descrito na secção [4.1](#41-formato-do-input).
+O programa deve ser desenvolvido num ficheiro `pipe.py`, que lê uma instância de *Pipe Mania* a partir do standard input no formato descrito na secção [4.1](#41-formato-do-input).
 O programa deve resolver o problema utilizando uma técnica à escolha e imprimir a solução para o standard output no formato descrito na secção [4.2](#42-formato-do-output).
 
 `python pipe.py <initial-state.txt>`
 
 ## 4 Formato de input e output
-Num tabuleiro de *Pipe Mania* existem 4 tipos de peças:
+Num tabuleiro de *Pipe Mania* existem 4 ***tipos de peças***:
 1. Peças de fecho (F), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
 2. Peças de bifurcação (B), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
 3. Peças de volta (V), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
 4. Peças de ligação (L), com orientação horizontal (H) e vertical (V).
 
-A [Figura 2](#figura-2-designações-para-as-peças-de-pipe-mania) contém a designação para cada uma das peças que podem existir num tabuleiro.
+A [Figura 2](#figura-2-designações-para-as-peças-de-pipe-mania) contém a designação para cada uma das peças que podem existir num tabuleiro.<br>
 A título de exemplo, as peças da primeira linha da [Figura 1a](#figura-1a-estado-inicial) correspondem a FB / VC / VD, enquanto que as peças da segunda fila correpondem a BC / BB / LV.
-<br>
 
 
 ##### Figura 2: Designações para as peças de *Pipe Mania*
@@ -96,7 +94,7 @@ A título de exemplo, as peças da primeira linha da [Figura 1a](#figura-1a-esta
 <br>
 
 ### 4.1 Formato do input
-As instâncias do problema P IPE M ANIA seguem o seguinte formato:
+As instâncias do problema *Pipe Mania* seguem o seguinte formato:
 ```
 <pipe-piece-l1c1> ... <pipe-piece-l1cN>
 <pipe-piece-l2c1> ... <pipe-piece-l2cN>
@@ -155,11 +153,11 @@ Estes ficheiros não devem ser alterados. Se houver necessidade de alterar defin
 Outras dependências não são permitidas, exceto o Python package numpy, que pode ser útil para representar a solução e ter acesso a operações sobre arrays.
 ##### 5.1.1 Procuras
 No ficheiro search.py estão implementadas as estruturas necessárias para correr os diferentes algoritmos de procura. Destacam-se:
-- Classe Problem: Representação abstrata do problema de procura;
-- Função breadth_first_tree_search: Procura em largura primeiro;
-- Função depth_first_tree_search: Procura em profundidade primeiro;
-- Função greedy_search: Procura gananciosa;
-- Função astar_search: Procura A*.
+- **Classe Problem**: Representação abstrata do problema de procura;
+- **Função breadth_first_tree_search**: Procura em largura primeiro;
+- **Função depth_first_tree_search**: Procura em profundidade primeiro;
+- **Função greedy_search**: Procura gananciosa;
+- **Função astar_search**: Procura A*.
 
 
 #### 5.1.2 Classe State
