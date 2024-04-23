@@ -310,7 +310,7 @@ print(result_state.board.get_value(2, 2))
 
 **Output:**
 ```
-FAITH
+FE
 FC
 ```
 
