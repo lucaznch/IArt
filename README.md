@@ -11,15 +11,16 @@ O objetivo do jogo é construir um sistema de canalização funcional para evita
 ## 2 Descrição do problema
 O jogo *Pipe Mania* decorre numa grelha quadrada, em que cada posição contém uma peça de tubagem.<br>
 O objetivo é rodar as peças de modo a que todas fiquem conectadas e a água possa circular sem fugas.<br>
-A [Figura 1a](media/) mostra um exemplo da disposição inicial de uma grelha. A [Figura 1b](media/) mostra uma solução para essa mesma grelha.<br>
+A [Figura 1a](#figura-1a-estado-inicial) mostra um exemplo da disposição inicial de uma grelha. A [Figura 1b](#figura-1b-objetivosolução) mostra uma solução para essa mesma grelha.<br>
 **Podemos assumir que uma instância de *Pipe Mania* tem uma solução única**.<br>
 As imagens que constam no enunciado foram obtidas a partir da aplicação Pipes PuzzleSet desenvolvida por Denis Pushkarev para IOS 2 e Android 3.
 
-![Figura 1a](media/initial-state.png): Estado inicial
+##### Figura 1a: Estado inicial
+![Figura 1a](media/initial-state.png)
 <br>
-<br>
-![Figura 1b](media/goal-and-solution.png): Objetivo/Solução
-<br>
+
+##### Figura 1b: Objetivo/Solução
+![Figura 1b](media/goal-and-solution.png)
 <br>
 
 
@@ -37,45 +38,59 @@ Num tabuleiro de *Pipe Mania* existem 4 tipos de peças:
 3. Peças de volta (V), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
 4. Peças de ligação (L), com orientação horizontal (H) e vertical (V).
 
-A [Figura 2](media/pieces/) contém a designação para cada uma das peças que podem existir num tabuleiro.
-A título de exemplo, as peças da primeira linha da [Figura 1a](media/pieces/) correspondem a FB / VC / VD, enquanto que as peças da segunda fila correpondem a BC / BB / LV.
+A [Figura 2](#figura-2-designações-para-as-peças-de-pipe-mania) contém a designação para cada uma das peças que podem existir num tabuleiro.
+A título de exemplo, as peças da primeira linha da [Figura 1a](#figura-1a-estado-inicial) correspondem a FB / VC / VD, enquanto que as peças da segunda fila correpondem a BC / BB / LV.
 <br>
 
-Figura 2: Designações para as peças de *Pipe Mania*
-<br>
 
+##### Figura 2: Designações para as peças de *Pipe Mania*
+**FC**<br>
 ![FC](media/pieces/FC.png)
 
+**FB**<br>
 ![FB](media/pieces/FB.png)
 
+**FE**<br>
 ![FE](media/pieces/FE.png)
 
+**FD**<br>
 ![FD](media/pieces/FD.png)
 <br>
 <br>
 
+**BC**<br>
 ![BC](media/pieces/BC.png)
 
+**BB**<br>
 ![BB](media/pieces/BB.png)
 
+
+**BE**<br>
 ![BE](media/pieces/BE.png)
 
+**BD**<br>
 ![BD](media/pieces/BD.png)
 <br>
 <br>
 
+**VC**<br>
 ![VC](media/pieces/VC.png)
 
+**VB**<br>
 ![VB](media/pieces/VB.png)
 
+**VE**<br>
 ![VE](media/pieces/VE.png)
 
+**VD**<br>
 ![VD](media/pieces/VD.png)
 <br>
 <br>
 
+**LH**<br>
 ![LH](media/pieces/LH.png)
 
+**LV**<br>
 ![LV](media/pieces/LV.png)
 <br>
 <br>
@@ -92,7 +107,7 @@ As instâncias do problema P IPE M ANIA seguem o seguinte formato:
 Os valores possíveis para `<pipe-piece-*>` são strings de duas letras, em que a primeira tem como domínio a **identificação da peça {F,B,V,L}** e a segunda tem como domínio a **orientação da peça {C,B,E,D,H,V}**.
 
 ##### 4.1.1 Exemplo
-O ficheiro de input que descreve a instância da [Figura 1a](media/) é o seguinte:
+O ficheiro de input que descreve a instância da [Figura 1a](#figura-1a-estado-inicial) é o seguinte:
 ```
 FB VC VD
 BC BB LV
