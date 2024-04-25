@@ -171,7 +171,8 @@ class Piece():
             elif self.orientation == PieceOrientation.RIGHT:
                 possible = [Direction.RIGHT, Direction.UP]
             
-            possible.remove(connected_direction)
+            if connected_direction != None:
+                possible.remove(connected_direction)
             return possible
         
         elif self.type == PieceType.CONNECTION:
@@ -182,7 +183,8 @@ class Piece():
             elif self.orientation == PieceOrientation.VERTICAL:
                 possible = [Direction.DOWN, Direction.UP]
             
-            possible.remove(connected_direction)
+            if connected_direction != None:
+                possible.remove(connected_direction)
             return possible
 
 class PipeManiaState():
