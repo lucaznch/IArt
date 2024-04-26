@@ -226,16 +226,14 @@ def parse_instance():
 
 
 #### 5.2.3 PipeMania Class
-The PipeMania class inherits from the Problem class defined in the search.py file of the code to be used and must implement the methods necessary for its operation.
+The **PipeMania class *inherits* from the Problem class** defined in the `search.py` file of the base code and must implement the methods necessary for its use.
 
-The actions method takes a state as an argument and returns a list of actions that
-can be executed from this state. The result method takes as arguments a state and an action, and returns the result of applying that action to that state.
-In a first approach, very simple and not very efficient, you can consider that an action corresponds to a 90° rotation of a certain part of the grid. In this case, each action can be represented by a tuple with 3 elements (row index, column index, 90° clockwise/anti-clockwise rotation), where the piece in the upper left corner corresponds to the coordinates (0,0). For example, (0, 1, False) represents the action “rotate the part in row 0 and column 1 anti-clockwise”. Note that other models, possibly more complex, should be more efficient.<br>
-
-To support informed searches, namely greedy search and
-A*, you must develop a heuristic that can guide these searches in the most efficient way possible.
-The heuristic corresponds to the implementation of the h method of the PipeMania class.
-This function takes a node as an argument, from which the current state can be accessed in node.state.<br>
+The `actions()` method takes a **state as an argument** and **returns a list of actions that can be executed from this state**. The `result()` method takes as **arguments a state and an action**, and **returns the result of applying that action to that state**. <br>
+>[!TIP]
+>In a **first approach**, very simple and not very efficient, you can consider that an action corresponds to a 90° rotation of a certain part of the grid. In this case, each action can be represented by a tuple with 3 elements (row index, column index, 90° clockwise/anti-clockwise rotation), where the piece in the upper left corner corresponds to the coordinates (0,0). For example, (0, 1, False) represents the action “rotate the part in row 0 and column 1 anti-clockwise”. Note that other models, possibly more complex, should be more efficient.<br>
+>[!NOTE]
+>To support informed searches, namely greedy search and A*, you must develop a heuristic that can guide these searches in the most efficient way possible.
+The heuristic corresponds to the implementation of the `h()` method of the PipeMania class. This function takes a **node as an argument**, from which the current state can be accessed in node.state.<br>
 
 Below is a prototype of the PipeMania class that can be used as a basis for its implementation.
 
