@@ -28,7 +28,6 @@ The objective of this project is to develop a program in Python 3.8.2 that, give
 The program must be developed in a `pipe.py` file, which reads an instance of *Pipe Mania* from the standard input in the format described in section [4.1](#41-input-format).
 The program must solve the problem using a technique of choice and print the solution to the standard output in the format described in section [4.2](#42-output-format).
 
-`python pipe.py <initial-state.txt>`
 
 ## 4 Input and output format
 On a *Pipe Mania* board there are 4 ***types of pieces***:
@@ -216,7 +215,7 @@ def parse_instance():
      and returns an instance of the Board class.
 
      For example:
-         $ python3 pipe_mania.py < input_T01
+         $ python3 pipe_mania.py < test-01.txt
 
          > from sys import stdin
          > line = stdin.readline().split()
