@@ -1,47 +1,46 @@
-# Projecto de Inteligência Artificial 2023/2024
+# Artificial Intelligence Project 2023/2024
 
 
-## 1 Introdução
-O projeto da unidade curricular de Inteligência Artificial tem como objetivo desenvolver um programa em Python 3.8 que resolva uma adaptação do problema *Pipe Mania* utilizando técnicas de procura e resolução de problemas de Inteligência Artificial.<br>
-O jogo *Pipe Mania* é um jogo de quebra-cabeças desenvolvido em 1989 pela The Assembly Line para o computador Amiga.<br>
-Posteriormente foi adaptado para várias outras plataformas pela Lucasfilm Games, que lhe deu o nome de "Pipe Dream".<br>
-O objetivo do jogo é construir um sistema de canalização funcional para evitar fugas de água.
+## 1. Introduction
+The Artificial Intelligence curricular unit project aims to develop a program in Python 3.8 that solves an adaptation of the *Pipe Mania* problem using Artificial Intelligence search and problem-solving techniques.<br>
+The game *Pipe Mania* is a puzzle game developed in 1989 by The Assembly Line for the Amiga computer.<br>
+It was later adapted for several other platforms by Lucasfilm Games, which gave it the name "Pipe Dream".<br>
+The objective of the game is to build a functional plumbing system to prevent water leaks.
 
 
-## 2 Descrição do problema
-O jogo *Pipe Mania* decorre numa grelha quadrada, em que cada posição contém uma peça de tubagem.<br>
-O objetivo é rodar as peças de modo a que todas fiquem conectadas e a água possa circular sem fugas.<br>
-A [Figura 1a](#figura-1a-estado-inicial) mostra um exemplo da disposição inicial de uma grelha. A [Figura 1b](#figura-1b-objetivosolução) mostra uma solução para essa mesma grelha.<br>
-**Podemos assumir que uma instância de *Pipe Mania* tem uma solução única**.<br>
+## 2 Problem description
+The *Pipe Mania* game takes place on a square grid, where each position contains a piece of pipe.<br>
+The objective is to rotate the pieces so that they are all connected and the water can circulate without leaks.<br>
+[Figure 1a](#figure-1a-initial-state) shows an example of the initial layout of a grid. [Figure 1b](#figura-1b-objectivesolution) shows a solution for this same grid.<br>
+**We can assume that an instance of *Pipe Mania* has a unique solution**.<br>
 
-##### Figura 1a: Estado inicial
-![Figura 1a](media/initial-state.png)
+##### Figure 1a: Initial state
+![Figure 1a](media/initial-state.png)
 <br>
 
-##### Figura 1b: Objetivo/Solução
-![Figura 1b](media/goal-and-solution.png)
+##### Figure 1b: Objective/Solution
+![Figure 1b](media/goal-and-solution.png)
 <br>
 
 
-## 3 Objetivo
-O objetivo deste projeto é o desenvolvimento de um programa em Python 3.8.2 que, dada uma instância de *Pipe Mani*a, retorna a solução (única), i.e., todos os tubos conectados e sem fugas.
-O programa deve ser desenvolvido num ficheiro `pipe.py`, que lê uma instância de *Pipe Mania* a partir do standard input no formato descrito na secção [4.1](#41-formato-do-input).
-O programa deve resolver o problema utilizando uma técnica à escolha e imprimir a solução para o standard output no formato descrito na secção [4.2](#42-formato-do-output).
-
-`python pipe.py <initial-state.txt>`
-
-## 4 Formato de input e output
-Num tabuleiro de *Pipe Mania* existem 4 ***tipos de peças***:
-1. Peças de fecho (F), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
-2. Peças de bifurcação (B), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
-3. Peças de volta (V), com orientação cima (C), baixo (B), esquerda (E) e direita (D);
-4. Peças de ligação (L), com orientação horizontal (H) e vertical (V).
-
-A [Figura 2](#figura-2-designações-para-as-peças-de-pipe-mania) contém a designação para cada uma das peças que podem existir num tabuleiro.<br>
-A título de exemplo, as peças da primeira linha da [Figura 1a](#figura-1a-estado-inicial) correspondem a FB / VC / VD, enquanto que as peças da segunda fila correpondem a BC / BB / LV.
+## 3 Objective
+The objective of this project is to develop a program in Python 3.8.2 that, given an instance of *Pipe Mani*a, returns the (unique) solution, i.e., all pipes connected and without leaks.
+The program must be developed in a `pipe.py` file, which reads an instance of *Pipe Mania* from the standard input in the format described in section [4.1](#41-input-format).
+The program must solve the problem using a technique of choice and print the solution to the standard output in the format described in section [4.2](#42-output-format).
 
 
-##### Figura 2: Designações para as peças de *Pipe Mania*
+## 4 Input and output format
+On a *Pipe Mania* board there are 4 ***types of pieces***:
+1. Closing parts (F), with orientation up (C), down (B), left (E) and right (D);
+2. Bifurcation pieces (B), with orientation up (C), down (B), left (E) and right (D);
+3. Back pieces (V), with orientation up (C), down (B), left (E) and right (D);
+4. Connection parts (L), with horizontal (H) and vertical (V) orientation.
+
+[Figure 2](#figure-2-designations-for-pipe-mania-pieces) contains the designation for each of the pieces that can exist on a board.<br>
+As an example, the pieces in the first row of [Figure 1a](#figure-1a-initial-state) correspond to FB / VC / VD, while the pieces in the second row correspond to BC / BB / LV.
+
+
+##### Figure 2: Designations for *Pipe Mania* pieces
 **FC**<br>
 ![FC](media/pieces/FC.png)
 
@@ -93,8 +92,8 @@ A título de exemplo, as peças da primeira linha da [Figura 1a](#figura-1a-esta
 <br>
 <br>
 
-### 4.1 Formato do input
-As instâncias do problema *Pipe Mania* seguem o seguinte formato:
+### 4.1 Input format
+The instances of the *Pipe Mania* problem follow the following format:
 ```
 <pipe-piece-l1c1> ... <pipe-piece-l1cN>
 <pipe-piece-l2c1> ... <pipe-piece-l2cN>
@@ -102,10 +101,10 @@ As instâncias do problema *Pipe Mania* seguem o seguinte formato:
 <pipe-piece-lNc1> ... <pipe-piece-lNcN>
 ```
 
-Os valores possíveis para `<pipe-piece-*>` são strings de duas letras, em que a primeira tem como domínio a **identificação da peça {F,B,V,L}** e a segunda tem como domínio a **orientação da peça {C,B,E,D,H,V}**.
+The possible values for `<pipe-piece-*>` are two-letter strings, where the first has as its domain the **part identification {F,B,V,L}** and the second has as its domain the **part orientation {C,B,E,D,H,V}**.
 
-##### 4.1.1 Exemplo
-O ficheiro de input que descreve a instância da [Figura 1a](#figura-1a-estado-inicial) é o seguinte:
+##### 4.1.1 Example
+The input file that describes the instance of [Figure 1a](#figura-1a-initial-state) is the following:
 ```
 FB VC VD
 BC BB LV
@@ -122,14 +121,14 @@ FB\tFB\tFE\n
 ```
 
 
-### 4.2 Formato do output
-O output do programa deve descrever uma solução para o problema de *Pipe Mania* descrito no ficheiro de input, i.e., uma grelha completamente preenchida que respeite as regras previamente enunciadas. 
-O output deve seguir o seguinte formato:
-- Uma linha por cada linha da grelha.
-- Cada linha indica o conteúdo da respetiva linha da grelha.
+### 4.2 Output format
+The program's output must describe a solution to the *Pipe Mania* problem described in the input file, i.e., a completely filled grid that respects the rules previously stated.
+The output must follow the following format:
+- One line for each line of the grid.
+- Each line indicates the content of the respective grid line.
 
-##### 4.2.1 Exemplo
-O output que descreve a solução da [Figura 1b](media/) é:
+##### 4.2.1 Example
+The output that describes the solution in [Figure 1b](media/) is:
 
 ```
 FB VB VE
@@ -143,137 +142,138 @@ BD\tBE\tLV\n
 FC\tFC\tFC\n
 ```
 
-## 5 Implementação
-Nesta secção é descrito o código que poderá ser usado no projeto e o código que deverá ser implementado no projeto.
+## 5 Implementation
+This section describes the code that can be used in the project and the code that must be implemented in the project.
 
-### 5.1 Código a utilizar
-Para a realização deste projeto devem ser utilizados os ficheiros Python, a ser disponibilizados na página da unidade curricular, que implementam os algoritmos de procura que irão ser dados ao longo da época letiva.<br>
-O mais importante é compreender para que servem e como usar as funcionalidades implementadas nestes ficheiros.<br>
-Estes ficheiros não devem ser alterados. Se houver necessidade de alterar definições incluídas nestes ficheiros, estas alterações devem ser feitas no ficheiro de código desenvolvido que contém a implementação do projeto.<br>
-Outras dependências não são permitidas, exceto o Python package numpy, que pode ser útil para representar a solução e ter acesso a operações sobre arrays.
-##### 5.1.1 Procuras
-No ficheiro search.py estão implementadas as estruturas necessárias para correr os diferentes algoritmos de procura. Destacam-se:
-- **Classe Problem**: Representação abstrata do problema de procura;
-- **Função breadth_first_tree_search**: Procura em largura primeiro;
-- **Função depth_first_tree_search**: Procura em profundidade primeiro;
-- **Função greedy_search**: Procura gananciosa;
-- **Função astar_search**: Procura A*.
+### 5.1 Code to use
+To carry out this project, Python files must be used, to be made available on the course page, which implement the search algorithms that will be given throughout the academic season.<br>
+The most important thing is to understand what they are for and how to use the features implemented in these files.<br>
+These files must not be changed. If there is a need to change definitions included in these files, these changes must be made in the developed code file that contains the project implementation.<br>
+Other dependencies are not allowed, except the Python package numpy, which can be useful for representing the solution and having access to operations on arrays.
+##### 5.1.1 Searches
+The `search.py` file contains the necessary structures to run the different search algorithms. The following stand out:
+- **Problem Class**: Abstract representation of the search problem;
+- **breadth_first_tree_search function**: Breadth-first search;
+- **depth_first_tree_search** function: Depth-first search;
+- **Greedy_search function**: Greedy search;
+- **astar_search function**: A* search.
 
 
-#### 5.1.2 Classe State
-Esta classe representa os estados utilizados nos algoritmos de procura. O membro board armazena a configuração da grelha a que o estado corresponde.<br>
-Abaixo é apresentado o código desta classe. Podem ser feitas alterações a esta classe, como por exemplo modificações ao método `__lt__(self, other)` para suportar funções de desempate mais complexas. No entanto, estas alterações devem ser devidamente justificadas com comentários no código.
+#### 5.1.2 State Class
+This class represents the states used in search algorithms. The board member stores the grid configuration that the state corresponds to.<br>
+Below is the code for this class. Changes can be made to this class, such as modifications to the `__lt__(self, other)` method to support more complex tiebreaker functions. However, these changes must be properly justified with comments in the code.
 
 ```python
 class PipeManiaState:
-    state_id = 0
+     state_id = 0
     
-    def __init__(self, board):
-        self.board = board
-        self.id = PipeManiaState.state_id
-        PipeManiaState.state_id += 1
+     def __init__(self, board):
+         self.board = board
+         self.id = PipeManiaState.state_id
+         PipeManiaState.state_id += 1
 
-    def __lt__(self, other):
-        """ Este método é utilizado em caso de empate na gestão da lista
-        de abertos nas procuras informadas. """
-        return self.id < other.id
+     def __lt__(self, other):
+         """ This method is used in case of a tie in list management
+         open in informed searches. """
+         return self.id < other.id
 ```
 
-### 5.2 Código a implementar
-#### 5.2.1 Classe Board
-A classe Board é a representação interna de uma grelha de *Pipe Mania*. A implementação desta classe e respectivos métodos é livre.<br>
-Pode, a título de exemplo, incluir os métodos para determinar valores adjacentes `adjacent_vertical_values` e `adjacent_horizontal_values` que recebem **dois argumentos**, as coordenadas na grelha **(linha, coluna)**, e devolvem um **tuplo com duas strings** que correspondem aos valores adjacentes **na vertical (acima, abaixo) e na horizontal (esquerda, direita)**, respectivamente. Caso não existam valores adjacentes, i.e. nas extremidades da grelha, devolvem **None**.<br>
-Pode também implementar outros métodos, como por exemplo um método `get_value` que retorne o valor preenchido numa determinada posição, ou um método print que imprime a grelha no formato descrito na secção [4.2](#42-formato-do-output).<br>
-Estes métodos poderão ser utilizados para fazer testes à restante implementação da classe.
+### 5.2 Code to implement
+#### 5.2.1 Board Class
+The Board class is the internal representation of a *Pipe Mania* grid. The implementation of this class and its methods is free.<br>
+You can, as an example, include the methods for determining adjacent values `adjacent_vertical_values` and `adjacent_horizontal_values` which receive **two arguments**, the grid coordinates **(row, column)**, and return a **tuple with two strings** that correspond to adjacent values **vertically (above, below) and horizontally (left, right)**, respectively. If there are no adjacent values, i.e. at the edges of the grid, they return **None**.<br>
+You can also implement other methods, such as a `get_value` method that returns the value filled in at a given position, or a print method that prints the grid in the format described in section [4.2](#42-output-format). <br>
+These methods can be used to test the remaining implementation of the class.
 
 
 ```python
-class Board:
-""" Representação interna de uma grelha de PipeMania. """
+Class Board:
+""" Internal representation of a PipeMania grid. """
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente acima e abaixo,
-        respectivamente. """
-        # TODO
-        pass
+     def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
+         """ Returns the values immediately above and below,
+         respectively. """
+         # TODO
+         pass
 
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        """ Devolve os valores imediatamente à esquerda e à direita,
-        respectivamente. """
-        # TODO
-        pass
+     def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
+         """ Returns the values immediately left and right,
+         respectively. """
+         # TODO
+         pass
 
-    # TODO: outros metodos da classe
+     # TODO: other methods in the class
 ```
 
-#### 5.2.2 Função parse_instance
-A função parse_instance é responsável por ler uma instância do problema no formato de input apresentado (secção [4.1](#41-formato-do-input)) e devolver um objeto do tipo Board que a represente. Esta função deve ler a instância a partir do standard input (stdin).
+#### 5.2.2 parse_instance function
+The parse_instance function is responsible for reading an instance of the problem in the presented input format (section [4.1](#41-input-format)) and returning an object of type Board that represents it. This function must read the instance from standard input (stdin).
 
 ```python
 @staticmethod
 def parse_instance():
-    """Lê a instância do problema do standard input (stdin)
-    e retorna uma instância da classe Board.
+     """Reads the problem instance from standard input (stdin)
+     and returns an instance of the Board class.
 
-    Por exemplo:
-        $ python3 pipe_mania.py < input_T01
+     For example:
+         $ python3 pipe_mania.py < test-01.txt
 
-        > from sys import stdin
-        > line = stdin.readline().split()
-    """
-    # TODO
-    pass
+         > from sys import stdin
+         > line = stdin.readline().split()
+     """
+     # TODO
+     pass
 ```
 
 
-#### 5.2.3 Classe PipeMania
-A classe PipeMania herda da classe Problem definida no ficheiro search.py do código a utilizar e deve implementar os métodos necessários ao seu funcionamento.
+#### 5.2.3 PipeMania Class
+The PipeMania class inherits from the Problem class defined in the search.py file of the code to be used and must implement the methods necessary for its operation.
 
-O método actions recebe como argumento um estado e retorna uma lista de ações que
-podem ser executadas a partir desse estado. O método result recebe como argumento um estado e uma ação, e retorna o resultado de aplicar essa ação a esse estado.
-Numa primeira abordagem, muito simples e pouco eficiente, pode considerar que uma ação corresponde a uma rotação de 90° de uma certa peça da grelha. Neste caso, cada ação pode ser representada por um tuplo com 3 elementos (índice da linha, índice da coluna, rotação 90° clockwise/anti-clockwise), em que a peça do canto superior esquerdo corresponde às coordenadas (0,0). Por exemplo, (0, 1, False) representa a ação “rodar a peça da linha 0 e coluna 1 anti-clockwise”. Note que outras modelações, eventualmente mais complexas, deverão ser mais eficientes.<br>
+The actions method takes a state as an argument and returns a list of actions that
+can be executed from this state. The result method takes as arguments a state and an action, and returns the result of applying that action to that state.
+In a first approach, very simple and not very efficient, you can consider that an action corresponds to a 90° rotation of a certain part of the grid. In this case, each action can be represented by a tuple with 3 elements (row index, column index, 90° clockwise/anti-clockwise rotation), where the piece in the upper left corner corresponds to the coordinates (0,0). For example, (0, 1, False) represents the action “rotate the part in row 0 and column 1 anti-clockwise”. Note that other models, possibly more complex, should be more efficient.<br>
 
-Para suportar as procuras informadas, nomeadamente a procura gananciosa e a procura
-A*, deve desenvolver uma heurística que consiga guiar da forma mais eficiente possível estas procuras. A heurística corresponde à implementação do método h da classe PipeMania.
-Estafunção recebe como argumento um node, a partir do qual se pode aceder ao estado atual em node.state.<br>
+To support informed searches, namely greedy search and
+A*, you must develop a heuristic that can guide these searches in the most efficient way possible.
+The heuristic corresponds to the implementation of the h method of the PipeMania class.
+This function takes a node as an argument, from which the current state can be accessed in node.state.<br>
 
-De seguida é disponibilizado um protótipo da classe PipeMania que pode ser usado como base para a sua implementação.
+Below is a prototype of the PipeMania class that can be used as a basis for its implementation.
 
 ```python
 class PipeMania(Problem):
-    def __init__(self, initial_state: Board, goal_state: Board):
-        """ O construtor especifica o estado inicial. """
-        # TODO
-        pass
+     def __init__(self, initial_state: Board, goal_state: Board):
+         """ The constructor specifies the initial state. """
+         # TODO
+         pass
 
-    def actions(self, state: State):
-        """ Retorna uma lista de ações que podem ser executadas a
-        partir do estado passado como argumento. """
-        # TODO
-        pass
+     def actions(self, state: State):
+         """ Returns a list of actions that can be performed at
+         from the past state as an argument. """
+         # TODO
+         pass
 
-    def result(self, state: State, action):
-        """ Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state). """
-        # TODO
-        pass
+     def result(self, state: State, action):
+         """ Returns the state resulting from executing the 'action' on
+         'state' passed as argument. The action to be taken must be a
+         of those present in the list obtained by carrying out
+         self.actions(state). """
+         # TODO
+         pass
 
-    def h(self, node: Node):
-        """ Função heuristica utilizada para a procura A*. """
-        # TODO
-        pass
+     def h(self, node: Node):
+         """ Heuristic function used for the A* search. """
+         # TODO
+         pass
 ```
 
 
-#### 5.2.4 Exemplos de utilização
-De seguida, são apresentados alguns exemplos da utilização do código a desenvolver, assim como o respetivo output. Estes exemplos podem ser utilizados para testar a implementação.
-Considere que o ficheiro initial-state.txt se encontra na diretoria "./boards/board-1/" e que contém a instância descrita na secção [4.1](#41-formato-do-input).
+#### 5.2.4 Examples of use
+Below, some examples of the use of the code to be developed are presented, as well as the respective output. These examples can be used to test the implementation.
+Consider that the initial-state.txt file is located in the directory "./boards/board-1/" and that it contains the instance described in section [4.1](#41-formato-do-input).
 
-**Exemplo 1:**<br>
+**Example 1:**<br>
 ```python
-# Ler grelha do figura 1a:
+# Read the grid in figure 1a:
 board = Board.parse_instance()
 print(board.adjacent_vertical_values(0, 0))
 print(board.adjacent_horizontal_values(0, 0))
@@ -291,19 +291,19 @@ print(board.adjacent_horizontal_values(1, 1))
 <br>
 <br>
 
-**Exemplo 2:**
+**Example 2:**
 ```python
-# Ler grelha do figura 1a:
+# Read the grid in figure 1a:
 board = Board.parse_instance()
-# Criar uma instância de PipeMania:
+# Create an instance of PipeMania:
 problem = PipeMania(board)
-# Criar um estado com a configuração inicial:
+# Create a state with the initial configuration:
 initial_state = PipeManiaState(board)
-# Mostrar valor na posição (2, 2):
+# Show value at position (2, 2):
 print(initial_state.board.get_value(2, 2))
-# Realizar ação de rodar 90° clockwise a peça (2, 2)
+# Perform the action of rotating the part 90° clockwise (2, 2)
 result_state = problem.result(initial_state, (2, 2, True))
-# Mostrar valor na posição (2, 2):
+# Show value at position (2, 2):
 print(result_state.board.get_value(2, 2))
 ```
 
@@ -316,27 +316,27 @@ FC
 <br>
 <br>
 
-**Exemplo 3:**
+**Example 3:**
 ```python
-# Ler grelha do figura 1a:
+# Read the grid in figure 1a:
 board = Board.parse_instance()
-# Criar uma instância de PipeMania:
+# Create an instance of PipeMania:
 problem = PipeMania(board)
-# Criar um estado com a configuração inicial:
+# Create a state with the initial configuration:
 s0 = PipeManiaState(board)
-# Aplicar as ações que resolvem a instância
+# Apply the actions that resolve the instance
 s1 = problem.result(s0, (0, 1, True))
 s2 = problem.result(s1, (0, 1, True))
 s3 = problem.result(s2, (0, 2, True))
 s4 = problem.result(s3, (0, 2, True))
 s5 = problem.result(s4, (1, 0, True))
 s6 = problem.result(s5, (1, 1, True))
-s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (exemplo de uso)
-s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (exemplo de uso)
+s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (example of use)
+s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (usage example)
 s9 = problem.result(s8, (2, 1, True))
 s10 = problem.result(s9, (2, 1, True))
 s11 = problem.result(s10, (2, 2, True))
-# Verificar se foi atingida a solução
+# Check if the solution has been reached
 print("Is goal?", problem.goal_test(s5))
 print("Is goal?", problem.goal_test(s11))
 print("Solution:\n", s11.board.print(), sep="")
@@ -355,15 +355,15 @@ FC FC FC
 <br>
 <br>
 
-**Exemplo 4:**
+**Example 4:**
 ```python
-# Ler grelha do figura 1a:
+# Read the grid in figure 1a:
 board = Board.parse_instance()
-# Criar uma instância de PipeMania:
+# Create an instance of PipeMania:
 problem = PipeMania(board)
-# Obter o nó solução usando a procura em profundidade:
+# Get the solution node using depth-first search:
 goal_node = depth_first_tree_search(problem)
-# Verificar se foi atingida a solução
+# Check if the solution has been reached
 print("Is goal?", problem.goal_test(goal_node.state))
 print("Solution:\n", goal_node.state.board.print(), sep="")
 ```
@@ -378,4 +378,4 @@ FC FC FC
 ```
 <br>
 <br>
-O valor de retorno das funções de procura é um objeto do tipo Node. Do nó de retorno podem ser retiradas as diversas informaçãoes, por exemplo, estado final (goal_node.state), a ação que levou ao estado final goal_node.action, e o nó precedente goal_node.parent.
+The return value of the search functions is an object of type Node. Various information can be removed from the return node, for example, the final state (goal_node.state), the action that led to the final state goal_node.action, and the preceding node goal_node.parent.
