@@ -2,7 +2,9 @@
 # 102637 Gabriel Silva
 # 105994 Jorge Mendes
 
-import sys
+from sys import stdin
+
+
 from search import (
     Problem,
     Node,
@@ -59,27 +61,58 @@ class Board:
 
     def adjacent_vertical_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately above and below, respectively."""
-        # TODO
-        pass
+        if row == 0 and row != self.len - 1:
+            above = "None"
+            below = self.board[row + 1][col]
+
+        elif row != 0 and row == self.len - 1:
+            above = self.board[row - 1][col]
+            below = "None"
+        
+        elif row == 0 and row == self.len - 1:
+            above = "None"
+            below = "None"
+        
+        else:
+            above = self.board[row - 1][col]
+            below = self.board[row + 1][col]
+
+
+        return "(" + above + ", " + below + ")"
 
     def adjacent_horizontal_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately to the left and right, respectively."""
-        # TODO
-        pass
+        if col == 0 and col != self.len - 1:
+            left = "None"
+            right = self.board[row][col + 1]
+
+        elif col != 0 and col == self.len - 1:
+            left = self.board[row][col - 1]
+            right = "None"
+        
+        elif col == 0 and col == self.len - 1:
+            left = "None"
+            right = "None"
+        
+        else:
+            left = self.board[row][col - 1]
+            right = self.board[row][col + 1]
+
+
+        return "(" + left + ", " + right + ")"
 
     @staticmethod
     def parse_instance():
         n = 0
         matrix = []
-        file = sys.argv[1]
 
-        with open(file, 'r') as file:
-            for line in file:
-                row = line.split()
-                matrix.append(row)
-                n += 1
-    
-        return Board(matrix, n)
+        while True:
+            line = stdin.readline().split()
+            if not line:
+                break
+            matrix.append(line)
+
+        return Board(matrix, len(matrix))
 
 
 
@@ -123,10 +156,15 @@ if __name__ == "__main__":
     # Remove the solution from the resulting node,
     # Print to standard output in the indicated format.
 
-
-    if len(sys.argv) != 2:
-        print("Usage: python3 program.py <initial-state.txt>")
-        sys.exit(1)
-
     board = Board.parse_instance()
+
+    print("\n")
     board.get_board_display()
+    print("\n")
+    print(board.get_board())
+    print("\n")
+
+    print(board.adjacent_vertical_values(0, 0))
+    print(board.adjacent_horizontal_values(0, 0))
+    print(board.adjacent_vertical_values(1, 1))
+    print(board.adjacent_horizontal_values(1, 1))
