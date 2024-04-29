@@ -31,10 +31,10 @@ The program must solve the problem using a technique of choice and print the sol
 
 ## 4 Input and output format
 On a *Pipe Mania* board there are 4 ***types of pieces***:
-1. Closing parts (F), with orientation up (C), down (B), left (E) and right (D);
+1. Closing pieces (F), with orientation up (C), down (B), left (E) and right (D);
 2. Bifurcation pieces (B), with orientation up (C), down (B), left (E) and right (D);
 3. Back pieces (V), with orientation up (C), down (B), left (E) and right (D);
-4. Connection parts (L), with horizontal (H) and vertical (V) orientation.
+4. Connection pieces (L), with horizontal (H) and vertical (V) orientation.
 
 [Figure 2](#figure-2-designations-for-pipe-mania-pieces) contains the designation for each of the pieces that can exist on a board.<br>
 As an example, the pieces in the first row of [Figure 1a](#figure-1a-initial-state) correspond to FB / VC / VD, while the pieces in the second row correspond to BC / BB / LV.
@@ -101,7 +101,7 @@ The instances of the *Pipe Mania* problem follow the following format:
 <pipe-piece-lNc1> ... <pipe-piece-lNcN>
 ```
 
-The possible values for `<pipe-piece-*>` are two-letter strings, where the first has as its domain the **part identification {F,B,V,L}** and the second has as its domain the **part orientation {C,B,E,D,H,V}**.
+The possible values for `<pipe-piece-*>` are two-letter strings, where the first has as its domain the **piece identification {F,B,V,L}** and the second has as its domain the **piece orientation {C,B,E,D,H,V}**.
 
 ##### 4.1.1 Example
 The input file that describes the instance of [Figure 1a](#figura-1a-initial-state) is the following:
@@ -230,7 +230,7 @@ The **PipeMania class *inherits* from the Problem class** defined in the `search
 
 The `actions()` method takes a **state as an argument** and **returns a list of actions that can be executed from this state**. The `result()` method takes as **arguments a state and an action**, and **returns the result of applying that action to that state**. <br>
 >[!TIP]
->In a **first approach**, very simple and not very efficient, you can consider that an action corresponds to a 90° rotation of a certain part of the grid. In this case, each action can be represented by a tuple with 3 elements (row index, column index, 90° clockwise/anti-clockwise rotation), where the piece in the upper left corner corresponds to the coordinates (0,0). For example, (0, 1, False) represents the action “rotate the part in row 0 and column 1 anti-clockwise”. Note that other models, possibly more complex, should be more efficient.
+>In a **first approach**, very simple and not very efficient, you can consider that an action corresponds to a 90° rotation of a certain piece of the grid. In this case, each action can be represented by a tuple with 3 elements (row index, column index, 90° clockwise/anti-clockwise rotation), where the piece in the upper left corner corresponds to the coordinates (0,0). For example, (0, 1, False) represents the action “rotate the piece in row 0 and column 1 anti-clockwise”. Note that other models, possibly more complex, should be more efficient.
 <br>
 
 >[!NOTE]
@@ -301,7 +301,7 @@ problem = PipeMania(board)
 initial_state = PipeManiaState(board)
 # Show value at position (2, 2):
 print(initial_state.board.get_value(2, 2))
-# Perform the action of rotating the part 90° clockwise (2, 2)
+# Perform the action of rotating the piece 90° clockwise (2, 2)
 result_state = problem.result(initial_state, (2, 2, True))
 # Show value at position (2, 2):
 print(result_state.board.get_value(2, 2))
