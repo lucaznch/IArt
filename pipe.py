@@ -45,24 +45,38 @@ PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clock
                   'LH': ['V', 'V'],
                   'LV': ['H', 'H']}
 
+hasLeftConnections = ['FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH']
+
+hasRightConnections = ['FD', 'BC', 'BB', 'BD', 'VB', 'VD', 'LH']
+
+hasUpConnections = ['FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV']
+
+hasDownConnections = ['FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV']
 
 
+LeftConnections = ['FD', 'BC', 'BB', 'BD', 'VB', 'VD', 'LH']
+
+RightConnections = ['FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH']
+
+UpConnections = ['FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV']
+
+DownConnections = ['FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV']
 
 # Piece connections:
-PieceConnections = {'FC': ['BB', 'BE', 'BD', 'VB', 'VE', 'LV'],
-                    'FB': ['D', 'E'],
-                    'FE': ['B', 'C'],
-                    'FD': ['C', 'B'],
-                    'BC': ['E', 'D'],
-                    'BB': ['D', 'E'],
-                    'BE': ['B', 'C'],
-                    'BD': ['C', 'B'],
-                    'VC': ['E', 'D'],
-                    'VB': ['D', 'E'],
-                    'VE': ['B', 'C'],
-                    'VD': ['C', 'B'],
-                    'LH': ['V', 'V'],
-                    'LV': ['H', 'H']}
+PieceConnections = {'FC': [UpConnections],
+                    'FB': [DownConnections],
+                    'FE': [LeftConnections],
+                    'FD': [RightConnections],
+                    'BC': [LeftConnections, UpConnections, RightConnections],
+                    'BB': [LeftConnections, DownConnections, RightConnections],
+                    'BE': [DownConnections, LeftConnections, UpConnections],
+                    'BD': [DownConnections, RightConnections, UpConnections],
+                    'VC': [LeftConnections, UpConnections],
+                    'VB': [DownConnections, RightConnections],
+                    'VE': [LeftConnections, DownConnections],
+                    'VD': [RightConnections, UpConnections],
+                    'LH': [LeftConnections, RightConnections],
+                    'LV': [UpConnections, DownConnections]}
 
 
 
@@ -117,25 +131,21 @@ class Board:
         self.board = board
         self.len = len
 
+
     def get_value(self, row: int, col: int) -> str:
         """Returns the value at the respective position on the board."""
         return self.board[row][col].get_piece()
 
+
     def get_len(self):
         return self.len
+
 
     def get_board(self):
         """Returns the board. The board is a list of lists. Each list represents a row of the board."""
         # example: [[Piece1, Piece2], [Piece3, Piece4]]
         return self.board
     
-    def get_board_display(self):
-        for i in range(self.len):
-            for j in range(self.len):
-                if j == self.len - 1:
-                    print(self.board[i][j].get_piece())
-                else:
-                    print(self.board[i][j].get_piece() + "\t", end='')
 
     def adjacent_vertical_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately above and below, respectively."""
@@ -157,6 +167,7 @@ class Board:
 
         return "(" + above + ", " + below + ")"
 
+
     def adjacent_horizontal_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately to the left and right, respectively."""
         if col == 0 and col != self.len - 1:
@@ -177,8 +188,20 @@ class Board:
 
         return "(" + left + ", " + right + ")"
 
+
     def rotate_one_piece(self, row, col, way):
         self.board[row][col].rotate(way)
+    
+    def print(self):
+        board_display = ''
+        for i in range(self.len):
+            for j in range(self.len):
+                if j == self.len - 1:
+                    board_display += self.board[i][j].get_piece() + "\n"
+                else:
+                    board_display += self.board[i][j].get_piece() + "\t"
+        return board_display
+
 
     @staticmethod
     def parse_instance():
@@ -244,10 +267,99 @@ class PipeMania(Problem):
         """Returns True if and only if the state passed as an argument is an objective state.
         You must check that all positions on the board are filled according to the rules of the problem."""
         
+        n = state.board.len
+
+        for i in range(n):
+            for j in range(n):
+                piece = state.board.get_value(i, j)
+
+                if i == 0:
+                    if j == 0:
+                        if piece in hasUpConnections or piece in hasLeftConnections:
+                            return False
+
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+
+                        elif piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+                    
+                    elif j != 0 and j != n - 1:
+                        if piece in hasUpConnections:
+                            return False
+
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+
+                        elif piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+                    
+                    elif j == n - 1:
+                        if piece in hasUpConnections or piece in hasRightConnections:
+                            return False
+
+                        elif piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+
+
+                elif i != 0 and i != n - 1:
+                    if j == 0:
+                        if piece in hasLeftConnections:
+                            return False
+                        
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+                        
+                        elif piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+                    
+                    elif j == n - 1:
+                        if piece in hasRightConnections:
+                            return False
+                        
+                        elif piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+
+                    else:
+                        if piece in hasDownConnections:
+                            if state.board.get_value(i + 1, j) not in DownConnections:
+                                return False
+                        
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+                
+
+                elif i == n - 1:
+                    if j == 0:
+                        if piece in hasLeftConnections or piece in hasDownConnections:
+                            return False
+                        
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+                    
+                    elif j != 0 and j != n - 1:
+                        if piece in hasDownConnections:
+                            return False
+
+                        elif piece in hasRightConnections:
+                            if state.board.get_value(i, j + 1) not in RightConnections:
+                                return False
+                    
+                    elif j == n - 1:
+                        if piece in hasRightConnections or piece in hasDownConnections:
+                            return False
         
-        
-        # TODO
-        pass
+        return True
 
     def h(self, node: Node):
         """Heuristic function used for the A* search."""
@@ -273,4 +385,26 @@ if __name__ == "__main__":
     # Use a search technique to resolve the instance,
     # Remove the solution from the resulting node,
     # Print to standard output in the indicated format.
-    pass
+
+    # Read the grid in figure 1a:
+    board = Board.parse_instance()
+    # Create an instance of PipeMania:
+    problem = PipeMania(board)
+    # Create a state with the initial configuration:
+    s0 = PipeManiaState(board)
+    # Apply the actions that resolve the instance
+    s1 = problem.result(s0, (0, 1, True))
+    s2 = problem.result(s1, (0, 1, True))
+    s3 = problem.result(s2, (0, 2, True))
+    s4 = problem.result(s3, (0, 2, True))
+    s5 = problem.result(s4, (1, 0, True))
+    s6 = problem.result(s5, (1, 1, True))
+    s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (example of use)
+    s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (usage example)
+    s9 = problem.result(s8, (2, 1, True))
+    s10 = problem.result(s9, (2, 1, True))
+    s11 = problem.result(s10, (2, 2, True))
+    # Check if the solution has been reached
+    print("Is goal?", problem.goal_test(s5))
+    print("Is goal?", problem.goal_test(s11))
+    print("Solution:\n", s11.board.print(), sep="")
