@@ -2,6 +2,8 @@
 # 102637 Gabriel Silva
 # 105994 Jorge Mendes
 
+import copy
+
 from sys import stdin
 
 from search import (
@@ -28,7 +30,7 @@ PIECE_ORIENTATION_LEFT = 'E'
 PIECE_ORIENTATION_RIGHT = 'D'
 
 # Piece rotations:
-PieceRotations = {'FC': ['E', 'D'],
+PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clockwise
                   'FB': ['D', 'E'],
                   'FE': ['B', 'C'],
                   'FD': ['C', 'B'],
@@ -42,6 +44,9 @@ PieceRotations = {'FC': ['E', 'D'],
                   'VD': ['C', 'B'],
                   'LH': ['V', 'V'],
                   'LV': ['H', 'H']}
+
+
+
 
 # Piece connections:
 PieceConnections = {'FC': ['BB', 'BE', 'BD', 'VB', 'VE', 'LV'],
@@ -81,7 +86,9 @@ class Piece:
         self.orientation = orientation
 
     def rotate(self, way):
-        """ way: 0 for anti clockwise, 1 for clockwise"""
+        """ way: True for clockwise, False for anti clockwise"""
+        way = 1 if way else 0
+
         new_orientation = PieceRotations[self.piece][way]
         self.orientation = new_orientation
         new_piece = self.type + new_orientation
@@ -215,20 +222,23 @@ class PipeManiaState:
 class PipeMania(Problem):
     def __init__(self, board: Board):
         """The constructor specifies the initial state."""
-        # TODO
-        pass
+        self.board = board
 
     def actions(self, state: PipeManiaState):
         """Returns a list of actions that can be performed from the state passed as an argument."""
-        state.board
+        
+        return (2, 2, True)
+        
         # TODO
         pass
 
     def result(self, state: PipeManiaState, action):
         """Returns the state resulting from executing the 'action' on 'state' passed as an argument.
         The action to be executed must be one of those present in the list obtained by executing self.actions(state)."""
-        # TODO
-        pass
+        board_cp = copy.deepcopy(state.board)
+        board_cp.rotate_one_piece(action[0], action[1], action[2])
+        return PipeManiaState(board_cp)
+
 
     def goal_test(self, state: PipeManiaState):
         """Returns True if and only if the state passed as an argument is an objective state.
@@ -263,52 +273,4 @@ if __name__ == "__main__":
     # Use a search technique to resolve the instance,
     # Remove the solution from the resulting node,
     # Print to standard output in the indicated format.
-
-
-    # Read the grid in figure 1a:
-    board = Board.parse_instance()
-
-    # Create an instance of PipeMania:
-    problem = PipeMania(board)
-
-    # Create a state with the initial configuration:
-    initial_state = PipeManiaState(board)
-
-
-    print("initial state:")
-    board.get_board_display()
-
-
-    print("piece at (2,2)")
-    print(initial_state.board.get_value(2, 2))
-
-
-    print("\nadjacent vertical values of 0,0")
-    print(board.adjacent_vertical_values(0, 0))
-    print("\nadjacent horizontal values of 0,0")
-    print(board.adjacent_horizontal_values(0, 0))
-
-    print("\nadjacent vertical values of 1,1")
-    print(board.adjacent_vertical_values(1, 1))
-    print("\nadjacent horizontal values of 1,1")
-    print(board.adjacent_horizontal_values(1, 1))
-
-    print("\nrotating piece at (0,0) clockwise(=1)")
-    print("rotating piece at (1,1) anticlockwise(=0)")
-    print("rotating piece at (0,1) clockwise(=1)")
-    print("rotating piece at (1,0) anticlockwise(=0)\n")
-
-    board.rotate_one_piece(0, 0, 1)
-    board.rotate_one_piece(1, 1, 0)
-    board.rotate_one_piece(0, 1, 1)
-    board.rotate_one_piece(1, 0, 0)
-
-    board.get_board_display()
-
-
-
-    # Perform the action of rotating the part 90° clockwise (2, 2)
-    # result_state = problem.result(initial_state, (2, 2, True))
-
-    # Show value at position (2, 2):
-    # print(result_state.board.get_value(2, 2))
+    pass
