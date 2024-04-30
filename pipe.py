@@ -29,6 +29,27 @@ PIECE_ORIENTATION_DOWN = 'B'
 PIECE_ORIENTATION_LEFT = 'E'
 PIECE_ORIENTATION_RIGHT = 'D'
 
+# Pieces:
+PIECE_FC = 'FC'
+PIECE_FB = 'FB'
+PIECE_FE = 'FE'
+PIECE_FD = 'FD'
+PIECE_BC = 'BC'
+PIECE_BB = 'BB'
+PIECE_BE = 'BE'
+PIECE_BD = 'BD'
+PIECE_VC = 'VC'
+PIECE_VB = 'VB'
+PIECE_VE = 'VE'
+PIECE_VD = 'VD'
+PIECE_LH = 'LH'
+PIECE_LV = 'LV'
+
+
+BOARD_INITIAL = 1
+BOARD_ORGANIZED_CORNERS = 2
+
+
 # Piece rotations:
 PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clockwise
                   'FB': ['D', 'E'],
@@ -45,38 +66,32 @@ PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clock
                   'LH': ['V', 'V'],
                   'LV': ['H', 'H']}
 
+# pieces that have connections on the left
 hasLeftConnections = ['FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH']
 
+# pieces that have connections on the right
 hasRightConnections = ['FD', 'BC', 'BB', 'BD', 'VB', 'VD', 'LH']
 
+# pieces that have connections above
 hasUpConnections = ['FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV']
 
+# pieces that have connections below
 hasDownConnections = ['FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV']
 
 
+# pieces that connect to the right, so they are LEFT connections
 LeftConnections = ['FD', 'BC', 'BB', 'BD', 'VB', 'VD', 'LH']
 
+# pieces that connect to the left, so they are RIGHT connections
 RightConnections = ['FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH']
 
+# pieces that connect below, so they are UP connections
 UpConnections = ['FB', 'BB', 'BE', 'BD', 'VB', 'VE', 'LV']
 
+# pieces that connect above, so they are DOWN connections
 DownConnections = ['FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV']
 
-# Piece connections:
-PieceConnections = {'FC': [UpConnections],
-                    'FB': [DownConnections],
-                    'FE': [LeftConnections],
-                    'FD': [RightConnections],
-                    'BC': [LeftConnections, UpConnections, RightConnections],
-                    'BB': [LeftConnections, DownConnections, RightConnections],
-                    'BE': [DownConnections, LeftConnections, UpConnections],
-                    'BD': [DownConnections, RightConnections, UpConnections],
-                    'VC': [LeftConnections, UpConnections],
-                    'VB': [DownConnections, RightConnections],
-                    'VE': [LeftConnections, DownConnections],
-                    'VD': [RightConnections, UpConnections],
-                    'LH': [LeftConnections, RightConnections],
-                    'LV': [UpConnections, DownConnections]}
+
 
 
 
@@ -228,6 +243,7 @@ class PipeManiaState:
 
     def __init__(self, board):
         self.board = board
+        self.board_status = BOARD_INITIAL
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
 
@@ -249,17 +265,151 @@ class PipeMania(Problem):
 
     def actions(self, state: PipeManiaState):
         """Returns a list of actions that can be performed from the state passed as an argument."""
+        actions = []
         
-        return (2, 2, True)
+        n = state.board.len
         
-        # TODO
-        pass
+        # if state is in initial state, we can only rotate the pieces in the corners
+        if state.board_status == BOARD_INITIAL:
+            for i in range(n):
+                for j in range(n):
+                    piece = state.board.get_value(i, j)
+                    
+                    if i == 0:
+                        if j == 0:
+                            if piece == PIECE_FE:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_FC:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VC:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VE:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VD:
+                                actions.append((i, j, True))
+                        elif j != 0 and j != n - 1:
+                            if piece == PIECE_FC:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VC:
+                                actions.append((i,j, False))
+                            elif piece == PIECE_VD:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_LV:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BC:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BE:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_BD:
+                                actions.append((i, j, True))
+                        elif j == n - 1:
+                            if piece == PIECE_FD:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_FC:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VC:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VD:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VB:
+                                actions.append((i, j, True))
+                    
+                    elif i != 0 and i != n - 1:
+                        if j != 0 and j != n - 1:
+                            # not a corner!
+                            continue
+                        if j == 0:
+                            if piece == PIECE_FE:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BC:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BB:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_BE:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VC:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VE:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_LH:
+                                actions.append((i, j, True))
+                        elif j == n - 1:
+                            if piece == PIECE_FD:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BC:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_BB:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BD:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VB:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VD:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_LH:
+                                actions.append((i, j, True))
+                    
+                    elif i == n - 1:
+                        if j == 0:
+                            if piece == PIECE_FE:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_FB:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VC:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VE:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VB:
+                                actions.append((i, j, False))
+                        elif j != 0 and j != n - 1:
+                            if piece == PIECE_FB:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_BE:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_BD:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_BB:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VB:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VE:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_LV:
+                                actions.append((i, j, True))
+                        elif j == n - 1:
+                            if piece == PIECE_FB:
+                                actions.append((i, j, True))
+                            elif piece == PIECE_FD:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VD:
+                                actions.append((i, j, False))
+                            elif piece == PIECE_VB:
+                                actions.append((i, j, True))
+                                actions.append((i, j, True))
+                            elif piece == PIECE_VE:
+                                actions.append((i, j, True))
+
+        return actions
 
     def result(self, state: PipeManiaState, action):
         """Returns the state resulting from executing the 'action' on 'state' passed as an argument.
         The action to be executed must be one of those present in the list obtained by executing self.actions(state)."""
         board_cp = copy.deepcopy(state.board)
-        board_cp.rotate_one_piece(action[0], action[1], action[2])
+
+        if isinstance(action, list):
+            for a in action:
+                board_cp.rotate_one_piece(a[0], a[1], a[2])
+        else:
+            board_cp.rotate_one_piece(action[0], action[1], action[2])
+
+        board_cp.board_status = BOARD_ORGANIZED_CORNERS
         return PipeManiaState(board_cp)
 
 
@@ -388,23 +538,15 @@ if __name__ == "__main__":
 
     # Read the grid in figure 1a:
     board = Board.parse_instance()
+    
     # Create an instance of PipeMania:
     problem = PipeMania(board)
-    # Create a state with the initial configuration:
+
     s0 = PipeManiaState(board)
-    # Apply the actions that resolve the instance
-    s1 = problem.result(s0, (0, 1, True))
-    s2 = problem.result(s1, (0, 1, True))
-    s3 = problem.result(s2, (0, 2, True))
-    s4 = problem.result(s3, (0, 2, True))
-    s5 = problem.result(s4, (1, 0, True))
-    s6 = problem.result(s5, (1, 1, True))
-    s7 = problem.result(s6, (2, 0, False)) # anti-clockwise (example of use)
-    s8 = problem.result(s7, (2, 0, False)) # anti-clockwise (usage example)
-    s9 = problem.result(s8, (2, 1, True))
-    s10 = problem.result(s9, (2, 1, True))
-    s11 = problem.result(s10, (2, 2, True))
-    # Check if the solution has been reached
-    print("Is goal?", problem.goal_test(s5))
-    print("Is goal?", problem.goal_test(s11))
-    print("Solution:\n", s11.board.print(), sep="")
+
+    a = problem.actions(s0)
+
+    s1 = problem.result(s0, a)
+
+    print("s0 board:\n" + s0.board.print())
+    print("s1 board:\n" + s1.board.print())
