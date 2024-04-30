@@ -16,19 +16,6 @@ from search import (
     recursive_best_first_search,
 )
 
-
-# Piece types:
-PIECE_TYPE_F = 'F' # Closed piece
-PIECE_TYPE_B = 'B' # Forked piece
-PIECE_TYPE_V = 'V' # Turning piece
-PIECE_TYPE_L = 'L' # Connection piece
-
-# Piece orientations:
-PIECE_ORIENTATION_UP = 'C'
-PIECE_ORIENTATION_DOWN = 'B'
-PIECE_ORIENTATION_LEFT = 'E'
-PIECE_ORIENTATION_RIGHT = 'D'
-
 # Pieces:
 PIECE_FC = 'FC'
 PIECE_FB = 'FB'
@@ -46,6 +33,7 @@ PIECE_LH = 'LH'
 PIECE_LV = 'LV'
 
 
+# Board status:
 BOARD_INITIAL = 1
 BOARD_ORGANIZED_CORNERS = 2
 
@@ -65,6 +53,7 @@ PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clock
                   'VD': ['C', 'B'],
                   'LH': ['V', 'V'],
                   'LV': ['H', 'H']}
+
 
 # pieces that have connections on the left
 hasLeftConnections = ['FE', 'BC', 'BB', 'BE', 'VC', 'VE', 'LH']
@@ -122,18 +111,6 @@ class Piece:
         self.orientation = new_orientation
         new_piece = self.type + new_orientation
         self.piece = new_piece
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -236,8 +213,6 @@ class Board:
 
 
 
-
-
 class PipeManiaState:
     state_id = 0
 
@@ -251,8 +226,6 @@ class PipeManiaState:
         return self.id < other.id
 
     # TODO: more methods?
-
-
 
 
 
@@ -517,13 +490,6 @@ class PipeMania(Problem):
         pass
 
     # TODO: more methods?
-
-
-
-
-
-
-
 
 
 
