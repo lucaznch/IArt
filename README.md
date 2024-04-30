@@ -378,4 +378,4 @@ FC FC FC
 ```
 <br>
 <br>
-The return value of the search functions is an object of type Node. Various information can be removed from the return node, for example, the final state (goal_node.state), the action that led to the final state goal_node.action, and the preceding node goal_node.parent.
+The return value of the search functions is an object of type Node. Various information can be retrieved from the return node, for example, the final state (goal_node.state), the action that led to the final state goal_node.action, and the preceding node goal_node.parent.
