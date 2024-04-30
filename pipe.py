@@ -142,44 +142,47 @@ class Board:
     def adjacent_vertical_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately above and below, respectively."""
         if row == 0 and row != self.len - 1:
-            above = "None"
+            above = None
             below = self.board[row + 1][col].get_piece()
 
         elif row != 0 and row == self.len - 1:
             above = self.board[row - 1][col].get_piece()
-            below = "None"
+            below = None
         
         elif row == 0 and row == self.len - 1:
-            above = "None"
-            below = "None"
+            above = None
+            below = None
         
         else:
             above = self.board[row - 1][col].get_piece()
             below = self.board[row + 1][col].get_piece()
+        
+        values = (above, below)
 
-        return "(" + above + ", " + below + ")"
+        return values
 
 
     def adjacent_horizontal_values(self, row: int, col: int) -> tuple[str, str]:
         """Returns the values immediately to the left and right, respectively."""
         if col == 0 and col != self.len - 1:
-            left = "None"
+            left = None
             right = self.board[row][col + 1].get_piece()
 
         elif col != 0 and col == self.len - 1:
             left = self.board[row][col - 1].get_piece()
-            right = "None"
+            right = None
         
         elif col == 0 and col == self.len - 1:
-            left = "None"
-            right = "None"
+            left = None
+            right = None
         
         else:
             left = self.board[row][col - 1].get_piece()
             right = self.board[row][col + 1].get_piece()
+        
+        values = (left, right)
 
-        return "(" + left + ", " + right + ")"
-
+        return values
 
     def rotate_one_piece(self, row, col, way):
         self.board[row][col].rotate(way)
@@ -505,14 +508,9 @@ if __name__ == "__main__":
     # Read the grid in figure 1a:
     board = Board.parse_instance()
     
-    # Create an instance of PipeMania:
-    problem = PipeMania(board)
+    print(board.adjacent_vertical_values(0, 0))
+    print(board.adjacent_horizontal_values(0, 0))
+    print(board.adjacent_vertical_values(1, 1))
+    print(board.adjacent_horizontal_values(1, 1))
 
-    s0 = PipeManiaState(board)
 
-    a = problem.actions(s0)
-
-    s1 = problem.result(s0, a)
-
-    print("s0 board:\n" + s0.board.print())
-    print("s1 board:\n" + s1.board.print())
