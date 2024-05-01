@@ -3,8 +3,9 @@
 # 00000 Nome2
 
 import sys
-from enum import Enum
 import numpy
+from copy import deepcopy
+from enum import Enum
 from search import (
     Problem,
     Node,
@@ -34,6 +35,18 @@ class Direction(Enum):
     DOWN = "B"
     LEFT = "E"
     RIGHT = "D"
+
+class PieceAction(Enum):
+    TURN_UP = "U"
+    TURN_DOWN = "D"
+    TURN_LEFT = "L"
+    TURN_RIGHT = "R"
+    TURN_HORIZONTAL = "H"
+    TURN_VERTICAL = "V"
+    NEXT_HORIZONTAL_RIGHT_PIECE = "NHR"
+    NEXT_HORIZONTAL_LEFT_PIECE = "NHL"
+    NEXT_VERTICAL_UP_PIECE = "NVU"
+    NEXT_VERTICAL_DOWN_PIECE = "NVD"
 
 class Piece():
     def __init__(self, type, orientation):
@@ -88,6 +101,22 @@ class Piece():
     def orientation(self):
         return self.orientation
 
+    def get_max_connections(self):
+        if self.type == PieceType.LOCK:
+            return 1
+        elif self.type == PieceType.JUNCTION:
+            return 3
+        elif self.type == PieceType.TURN:
+            return 2
+        else:
+            return 2
+    
+    def get_possible_actions(self):
+        if self.type != PieceType.CONNECTION:
+            return [PieceAction.TURN_UP, PieceAction.TURN_DOWN, PieceAction.TURN_LEFT, PieceAction.TURN_RIGHT, PieceAction.NEXT_HORIZONTAL_RIGHT_PIECE, PieceAction.NEXT_HORIZONTAL_LEFT_PIECE, PieceAction.NEXT_VERTICAL_UP_PIECE, PieceAction.NEXT_VERTICAL_DOWN_PIECE]
+        else:
+            return [PieceAction.TURN_HORIZONTAL, PieceAction.TURN_VERTICAL, PieceAction.NEXT_HORIZONTAL_RIGHT_PIECE, PieceAction.NEXT_HORIZONTAL_LEFT_PIECE, PieceAction.NEXT_VERTICAL_UP_PIECE, PieceAction.NEXT_VERTICAL_DOWN_PIECE]
+    
     def can_accept_the_flow(self, direction):
         if self.type == PieceType.LOCK:
             if self.orientation == PieceOrientation.UP and direction == Direction.UP:
@@ -187,25 +216,10 @@ class Piece():
                 possible.remove(connected_direction)
             return possible
 
-class PipeManiaState():
-    state_id = 0
-
-    def __init__(self, board):
-        self.board = board
-        self.x = 0
-        self.y = 0
-        self.id = PipeManiaState.state_id
-        PipeManiaState.state_id += 1
-
-    def __lt__(self, other):
-        return self.id < other.id
-    
-    def move_pos(self, x=0, y=0):
-        self.pos = [self.pos[0] + x, self.pos[1] + y]
-
 class Board():
-    def __init__(self, field):
+    def __init__(self, field, max_connections):
         self.field = field
+        self.max_connections = max_connections
 
     def __repr__(self):
         result = ""
@@ -222,51 +236,89 @@ class Board():
     def parse_instance():
         lines = sys.stdin.readlines()
         field = [[Piece.parse_instance(str_piece) if str_piece.strip() else None for str_piece in line.split()] for line in lines]
-        return Board(field)
+
+        max_connections = 0
+        for row in field:
+            for piece in row:
+                max_connections += piece.get_max_connections()
+
+        return Board(field, max_connections)
 
     def get_value(self, row:int, col:int):
         return self.field[row][col]
 
-    def adjacent_vertical_values(self, row: int, col: int) -> (str, str):
-        return (None if row == 0 else self.field[row-1][col], None if row == len(self.field) - 1 else self.field[row+1][col])
-
-    def adjacent_horizontal_values(self, row: int, col: int) -> (str, str):
-        return (None if col == 0 else self.field[row][col-1], None if col == len(self.field[0]) - 1 else self.field[row][col+1])
-    
     def get_size(self):
         return len(self.field)*len(self.field[0])
+    
+    def rotate_piece(self, x, y, rotation_type):
+        if rotation_type == PieceAction.TURN_UP:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.UP)
+        elif rotation_type == PieceAction.TURN_DOWN:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.DOWN)
+        elif rotation_type == PieceAction.TURN_LEFT:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.LEFT)
+        elif rotation_type == PieceAction.TURN_RIGHT:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.RIGHT)
+        elif rotation_type == PieceAction.TURN_HORIZONTAL:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.HORIZONTAL)
+        elif rotation_type == PieceAction.TURN_VERTICAL:
+            self.field[y][x] = Piece(self.field[y][x].type, PieceOrientation.VERTICAL)
+
+class PipeManiaState():
+    state_id = 0
+
+    def __init__(self, board, x, y, connected_pieces):
+        self.board = board
+
+        self.x = x
+        self.y = y
+
+        self.connected_pieces = connected_pieces
+        self.max_connections = board.max_connections
+
+        self.id = PipeManiaState.state_id
+        PipeManiaState.state_id += 1
+
+    def __lt__(self, other):
+        return self.id < other.id
 
 class PipeMania(Problem):
     def __init__(self, board: Board):
-        self.initial = PipeManiaState(board)
+        self.initial = PipeManiaState(board, 0, 0, 0)
 
     def actions(self, state: PipeManiaState):
-        piece = state.board.get_value(state.x, state.y)
+        actions = state.board.get_value(state.y, state.x).get_possible_actions()
 
-        if piece.type() != PieceType.CONNECTION:
-            if piece.orientation() == PieceOrientation.DOWN:
-                return ['TURN UP', 'TURN LEFT', 'TURN RIGHT', 'TRY TO CONNECT']
-            elif piece.orientation() == PieceOrientation.UP:
-                return ['TURN DOWN', 'TURN LEFT', 'TURN RIGHT', 'TRY TO CONNECT']
-            elif piece.orientation() == PieceOrientation.LEFT:
-                return ['TURN RIGHT', 'TURN UP', 'TURN DOWN', 'TRY TO CONNECT']
-            elif piece.orientation() == PieceOrientation.RIGHT:
-                return ['TURN LEFT', 'TURN UP', 'TURN DOWN', 'TRY TO CONNECT']
-        else:
-            if piece.orientation() == PieceOrientation.HORIZONTAL:
-                return ['TURN VERTICAL', 'TRY TO CONNECT']
-            else:
-                return ['TURN HORIZONTAL', 'TRY TO CONNECT']
+        if state.x == len(state.board.field[0]) - 1:
+            actions.remove(PieceAction.NEXT_HORIZONTAL_RIGHT_PIECE)
+        elif state.x == 0:
+            actions.remove(PieceAction.NEXT_HORIZONTAL_LEFT_PIECE)
+
+        if state.y == len(state.board.field) - 1:
+            actions.remove(PieceAction.NEXT_VERTICAL_DOWN_PIECE)
+        elif state.y == 0:
+            actions.remove(PieceAction.NEXT_VERTICAL_UP_PIECE)
+
+        return actions
 
     def result(self, state: PipeManiaState, action):
-        """Retorna o estado resultante de executar a 'action' sobre
-        'state' passado como argumento. A ação a executar deve ser uma
-        das presentes na lista obtida pela execução de
-        self.actions(state)."""
-        # TODO
-        pass
+        clone = deepcopy(state)
+
+        if action in (PieceAction.TURN_UP, PieceAction.TURN_DOWN, PieceAction.TURN_LEFT, PieceAction.TURN_RIGHT, PieceAction.TURN_HORIZONTAL, PieceAction.TURN_VERTICAL):
+            clone.board.rotate_piece(clone.x, clone.y, action)
+        elif action == PieceAction.NEXT_HORIZONTAL_RIGHT_PIECE:
+            clone.x = clone.x + 1
+        elif action == PieceAction.NEXT_HORIZONTAL_LEFT_PIECE:
+            clone.x = clone.x - 1
+        elif action == PieceAction.NEXT_VERTICAL_UP_PIECE:
+            clone.y = clone.y - 1
+        elif action == PieceAction.NEXT_VERTICAL_DOWN_PIECE:
+            clone.y = clone.y + 1
+
+        return clone
 
     def goal_test(self, state: PipeManiaState):
+        '''return state.max_connections == state.connected_pieces'''
         accepted = {}
         possibilities = [((0,0), None)] # ((x,y), direction)
 
@@ -296,15 +348,18 @@ class PipeMania(Problem):
         return state.board.get_size() == len(accepted)
     
     def h(self, node: Node):
-        """Função heuristica utilizada para a procura A*."""
-        # TODO
-        pass
+        return node.state.max_connections - node.state.connected_pieces
 
 def main():
+    # Ler grelha do figura 1a:
     board = Board.parse_instance()
+    # Criar uma instância de PipeMania:
     problem = PipeMania(board)
-    print(board)
-    print("Is goal?", problem.goal_test(problem.initial))
+    # Obter o nó solução usando a procura em profundidade:
+    goal_node = breadth_first_tree_search(problem)
+    # Verificar se foi atingida a solução
+    print("Is goal?", problem.goal_test(goal_node.state))
+    print("Solution:\n", goal_node.state.board.print(), sep="")
 
 if __name__ == "__main__":
     main()
