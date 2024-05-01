@@ -355,7 +355,6 @@ def main():
     board = Board.parse_instance()
     # Criar uma instância de PipeMania:
     problem = PipeMania(board)
-    # Obter o nó solução usando a procura em profundidade:
     goal_node = breadth_first_tree_search(problem)
     # Verificar se foi atingida a solução
     print("Is goal?", problem.goal_test(goal_node.state))
