@@ -52,6 +52,7 @@ class Piece:
     def __init__(self, orientation):
         self.orientation = orientation
         self.connections = 0
+        self.connected_pieces = []
 
     def __str__(self):
         return f'{self.get_type()}{self.orientation.value}'
@@ -240,14 +241,12 @@ class Board:
     def __init__(self, field):
         self.field = field
         self.number_of_connections = 0
-        #for row in range(len(field)):
-        #    for col in range(len(field[0])):
-        #        self.check_connections(row, col)
 
         self.total_number_of_connections = 0
         for row in field:
             for piece in row:
                 self.total_number_of_connections += piece.get_max_connections()
+                
 
     def __repr__(self):
         result = ""
@@ -265,37 +264,52 @@ class Board:
 
     def rotate_piece(self, row, col, rotation_type):
         piece = self.get_piece(row, col)
-        orientation = piece.get_orientation()
 
         if rotation_type == PieceAction.TURN_UP:
-            orientation = PieceOrientation.UP
+            piece.orientation = PieceOrientation.UP
         elif rotation_type == PieceAction.TURN_DOWN:
-            orientation = PieceOrientation.DOWN
+            piece.orientation = PieceOrientation.DOWN
         elif rotation_type == PieceAction.TURN_LEFT:
-            orientation = PieceOrientation.LEFT
+            piece.orientation = PieceOrientation.LEFT
         elif rotation_type == PieceAction.TURN_RIGHT:
-            orientation = PieceOrientation.RIGHT
+            piece.orientation = PieceOrientation.RIGHT
         elif rotation_type == PieceAction.TURN_HORIZONTAL:
-            orientation = PieceOrientation.HORIZONTAL
+            piece.orientation = PieceOrientation.HORIZONTAL
         elif rotation_type == PieceAction.TURN_VERTICAL:
-            orientation = PieceOrientation.VERTICAL
+            piece.orientation = PieceOrientation.VERTICAL
 
-        piece.orientation = orientation
-        self.check_connections(row, col)
+        self.update_connections(row, col) # update the connections
 
-    def check_connections(self, row, col):
-        piece = self.field[row][col]
 
-        self.number_of_connections -= 2 * piece.connections # cada "conexão" precisa de 2 conexões, uma de cada peça
-        piece.connections = 0
-
-        for dir in Direction:
-            other_row, other_col = direction_operations[dir](row, col)
-            if 0 <= other_row < len(self.field) and 0 <= other_col < len(self.field[0]):
-                if piece.can_emit(dir) and self.field[other_row][other_col].can_receive(dir):
-                    piece.connections += 1
+    def update_connections(self, row, col):
+        specified_piece = self.field[row][col]
         
-        self.number_of_connections += 2 * piece.connections
+        x = specified_piece.connections
+
+        # Remove specified_piece from connected_pieces of its connected pieces
+        for piece in specified_piece.connected_pieces:
+            piece.connections -= 1
+            self.number_of_connections -= 2
+            piece.connected_pieces.remove(specified_piece)
+
+        specified_piece.connections = 0
+        specified_piece.connected_pieces = []
+
+        # Check connections in all directions
+        for dir in Direction:  # Assuming Direction is an enum or a defined set of directions
+            if specified_piece.can_emit(dir):
+                other_row, other_col = direction_operations[dir](row, col)
+                
+                if 0 <= other_row < len(self.field) and 0 <= other_col < len(self.field[0]):
+                    if self.field[other_row][other_col].can_receive(dir):
+                        # Update connections for the specified piece and the connected piece
+                        specified_piece.connections += 1
+                        self.field[other_row][other_col].connections += 1
+                        self.number_of_connections += 2
+                        
+                        # Add connected pieces to each other's connected_pieces list
+                        specified_piece.connected_pieces.append(self.field[other_row][other_col])
+                        self.field[other_row][other_col].connected_pieces.append(specified_piece)
 
     @staticmethod
     def parse_instance():
@@ -376,9 +390,8 @@ def main():
     board = Board.parse_instance()
     problem = PipeMania(board)
     problem.pre_processamento(board)
-    node = astar_search(problem, problem.h)
+    node = greedy_search(problem, problem.h)
     print(node.state.board)
 
 if __name__ == "__main__":
     main()
-
