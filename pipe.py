@@ -1,11 +1,14 @@
-# Grupo 15:
-# 102637 Gabriel Silva
-# 105994 Jorge Mendes
+# pipe.py: Template para implementação do projeto de Inteligência Artificial 2023/2024.
+# Devem alterar as classes e funções neste ficheiro de acordo com as instruções do enunciado.
+# Além das funções e classes sugeridas, podem acrescentar outras que considerem pertinentes.
 
-import copy
+# Grupo 00:
+# 00000 Nome1
+# 00000 Nome2
 
+import sys
+from copy import deepcopy
 from sys import stdin
-
 from search import (
     Problem,
     Node,
@@ -15,6 +18,8 @@ from search import (
     greedy_search,
     recursive_best_first_search,
 )
+
+
 
 # Pieces:
 PIECE_FC = 'FC'
@@ -32,27 +37,35 @@ PIECE_VD = 'VD'
 PIECE_LH = 'LH'
 PIECE_LV = 'LV'
 
-
-# Board status:
-BOARD_INITIAL = 1
-BOARD_ORGANIZED_CORNERS = 2
+# Piece types:
+PIECE_TYPE_F = 'F' # Closed piece
+PIECE_TYPE_B = 'B' # Forked piece
+PIECE_TYPE_V = 'V' # Turning piece
+PIECE_TYPE_L = 'L' # Connection piece
 
 
 # Piece rotations:
-PieceRotations = {'FC': ['E', 'D'], # index 0 is anticlockwise, index 1 is clockwise
-                  'FB': ['D', 'E'],
-                  'FE': ['B', 'C'],
-                  'FD': ['C', 'B'],
-                  'BC': ['E', 'D'],
-                  'BB': ['D', 'E'],
-                  'BE': ['B', 'C'],
-                  'BD': ['C', 'B'],
-                  'VC': ['E', 'D'],
-                  'VB': ['D', 'E'],
-                  'VE': ['B', 'C'],
-                  'VD': ['C', 'B'],
-                  'LH': ['V', 'V'],
-                  'LV': ['H', 'H']}
+# index 0, 1 and 2 correspond to a 90 degree clockwise rotation, 90 degree counter-clockwise rotation and 180 degree rotation, respectively
+PieceRotations = {'FC': ['FD', 'FE', 'FB'], 
+                  'FB': ['FE', 'FD', 'FC'],
+                  'FE': ['FC', 'FB', 'FD'],
+                  'FD': ['FB', 'FC', 'FE'],
+                  'BC': ['BD', 'BE', 'BB'],
+                  'BB': ['BE', 'BD', 'BC'],
+                  'BE': ['BC', 'BB', 'BD'],
+                  'BD': ['BB', 'BC', 'BE'],
+                  'VC': ['VD', 'VE', 'VB'],
+                  'VB': ['VE', 'VD', 'VC'],
+                  'VE': ['VC', 'VB', 'VD'],
+                  'VD': ['VB', 'VC', 'VE'],
+                  'LH': ['LV', 'LV', 'LH'],
+                  'LV': ['LH', 'LH', 'LV']}
+
+ROTATION_90_CLOCKWISE = 0
+ROTATION_90_COUNTER_CLOCKWISE = 1
+ROTATION_180 = 2
+ROTATION_NONE = 3
+
 
 
 # pieces that have connections on the left
@@ -83,134 +96,212 @@ DownConnections = ['FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV']
 
 
 
+def preprocessing(pieces, n):
+    for i in range(n):
+        for j in range(n):
+            piece = pieces[i][j]
+            piece_value = pieces[i][j].get_piece_value()
+            
+            if i == 0:
+                if j == 0:
+                    if piece_value == PIECE_FE:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_FC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VE:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                elif j != 0 and j != n - 1:
+                    if piece_value == PIECE_FC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VC:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_LV:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BE:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_BD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                elif j == n - 1:
+                    if piece_value == PIECE_FD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_FC:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VC:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+            
+            elif i != 0 and i != n - 1:
+                if j != 0 and j != n - 1:
+                    # if not an egde, move on!
+                    continue
+                if j == 0:
+                    if piece_value == PIECE_FE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BB:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_BE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VE:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_LH:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                elif j == n - 1:
+                    if piece_value == PIECE_FD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BC:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_BB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BD:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VD:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_LH:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+            
+            elif i == n - 1:
+                if j == 0:
+                    if piece_value == PIECE_FE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_FB:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VC:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VB:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                elif j != 0 and j != n - 1:
+                    if piece_value == PIECE_FB:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_BE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_BD:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_BB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VB:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_LV:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                elif j == n - 1:
+                    if piece_value == PIECE_FB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_FD:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VD:
+                        piece.rotate(ROTATION_90_COUNTER_CLOCKWISE)
+                    elif piece_value == PIECE_VB:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                        piece.rotate(ROTATION_90_CLOCKWISE)
+                    elif piece_value == PIECE_VE:
+                        piece.rotate(ROTATION_90_CLOCKWISE)
 
 
 class Piece:
-    def __init__(self, piece):
-        self.type = piece[0]
-        self.orientation = piece[1]
-        self.piece = piece
+    def __init__(self, value):
+        self.value = value
     
-    def get_type(self):
-        return self.type
+    def get_piece_type(self):
+        return self.value[0]
     
-    def get_orientation(self):
-        return self.orientation
-
-    def get_piece(self):
-        return self.piece
+    def get_piece_orientation(self):
+        return self.value[1]
     
-    def set_orientation(self, orientation):
-        self.orientation = orientation
+    def get_piece_value(self):
+        return self.value
 
-    def rotate(self, way):
-        """ way: True for clockwise, False for anti clockwise"""
-        way = 1 if way else 0
-
-        new_orientation = PieceRotations[self.piece][way]
-        self.orientation = new_orientation
-        new_piece = self.type + new_orientation
-        self.piece = new_piece
+    def rotate(self, rotation):
+        if rotation == ROTATION_NONE:
+            pass
+        else:
+            self.value = PieceRotations[self.value][rotation]
 
 
 
 
 
 class Board:
-    """Internal representation of a PipeMania board."""
-
-    def __init__(self, board, len):
-        self.board = board
+    def __init__(self, matrix, len):
+        self.matrix = matrix
         self.len = len
 
-
     def get_value(self, row: int, col: int) -> str:
-        """Returns the value at the respective position on the board."""
-        return self.board[row][col].get_piece()
-
-
-    def get_len(self):
-        return self.len
-
-
-    def get_board(self):
-        """Returns the board. The board is a list of lists. Each list represents a row of the board."""
-        # example: [[Piece1, Piece2], [Piece3, Piece4]]
-        return self.board
+        return self.matrix[row][col].get_piece_value()
     
+    def get_piece(self, row: int, col: int) -> Piece:
+        return self.matrix[row][col]
 
     def adjacent_vertical_values(self, row: int, col: int) -> tuple[str, str]:
-        """Returns the values immediately above and below, respectively."""
-        if row == 0 and row != self.len - 1:
-            above = None
-            below = self.board[row + 1][col].get_piece()
-
-        elif row != 0 and row == self.len - 1:
-            above = self.board[row - 1][col].get_piece()
-            below = None
-        
-        elif row == 0 and row == self.len - 1:
-            above = None
-            below = None
-        
+        if row == 0:
+            return (None, self.matrix[row + 1][col].get_piece_value())
+        elif row == self.len - 1:
+            return (self.matrix[row - 1][col].get_piece_value(), None)
         else:
-            above = self.board[row - 1][col].get_piece()
-            below = self.board[row + 1][col].get_piece()
-        
-        values = (above, below)
-
-        return values
-
+            return (self.matrix[row - 1][col].get_piece_value(), self.matrix[row + 1][col].get_piece_value())
 
     def adjacent_horizontal_values(self, row: int, col: int) -> tuple[str, str]:
-        """Returns the values immediately to the left and right, respectively."""
-        if col == 0 and col != self.len - 1:
-            left = None
-            right = self.board[row][col + 1].get_piece()
-
-        elif col != 0 and col == self.len - 1:
-            left = self.board[row][col - 1].get_piece()
-            right = None
-        
-        elif col == 0 and col == self.len - 1:
-            left = None
-            right = None
-        
+        if col == 0:
+            return (None, self.matrix[row][col + 1].get_piece_value())
+        elif col == self.len - 1:
+            return (self.matrix[row][col - 1].get_piece_value(), None)
         else:
-            left = self.board[row][col - 1].get_piece()
-            right = self.board[row][col + 1].get_piece()
-        
-        values = (left, right)
+            return (self.matrix[row][col - 1].get_piece_value(), self.matrix[row][col + 1].get_piece_value())
 
-        return values
-
-    def rotate_one_piece(self, row, col, way):
-        self.board[row][col].rotate(way)
-    
     def print(self):
         board_display = ''
         for i in range(self.len):
             for j in range(self.len):
                 if j == self.len - 1:
-                    board_display += self.board[i][j].get_piece() + "\n"
+                    board_display += self.matrix[i][j].get_piece_value() + "\n"
                 else:
-                    board_display += self.board[i][j].get_piece() + "\t"
+                    board_display += self.matrix[i][j].get_piece_value() + "\t"
         return board_display
-
+    
+    def execute_action(self, row, col, rotation):
+        self.matrix[row][col].rotate(rotation)
 
     @staticmethod
     def parse_instance():
         n = 0
-        pieces = []
+        matrix = [] # e.g. [[Piece1, Piece2], [Piece3, Piece4]]
 
         while True:
             line = stdin.readline().split()
             if not line:
                 break
             n += 1
-            pieces.append([Piece(piece) for piece in line])
+            matrix.append([Piece(p) for p in line])
+        
+        preprocessing(matrix, n)
 
-        return Board(pieces, n)
+        return Board(matrix, n)
 
 
 
@@ -219,16 +310,17 @@ class Board:
 class PipeManiaState:
     state_id = 0
 
-    def __init__(self, board):
+    def __init__(self, board, row=0, col=0):
         self.board = board
-        self.board_status = BOARD_INITIAL
+        self.row = row
+        self.col = col
         self.id = PipeManiaState.state_id
         PipeManiaState.state_id += 1
 
     def __lt__(self, other):
         return self.id < other.id
 
-    # TODO: more methods?
+
 
 
 
@@ -236,163 +328,178 @@ class PipeManiaState:
 
 class PipeMania(Problem):
     def __init__(self, board: Board):
-        """The constructor specifies the initial state."""
-        self.board = board
+        self.initial = PipeManiaState(board)
+        self.goal = None
 
     def actions(self, state: PipeManiaState):
-        """Returns a list of actions that can be performed from the state passed as an argument."""
-        actions = []
-        
+        row = state.row
+        col = state.col
         n = state.board.len
-        
-        # if state is in initial state, we can only rotate the pieces in the corners
-        if state.board_status == BOARD_INITIAL:
-            for i in range(n):
-                for j in range(n):
-                    piece = state.board.get_value(i, j)
-                    
-                    if i == 0:
-                        if j == 0:
-                            if piece == PIECE_FE:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_FC:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VC:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VE:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VD:
-                                actions.append((i, j, True))
-                        elif j != 0 and j != n - 1:
-                            if piece == PIECE_FC:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VC:
-                                actions.append((i,j, False))
-                            elif piece == PIECE_VD:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_LV:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BC:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BE:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_BD:
-                                actions.append((i, j, True))
-                        elif j == n - 1:
-                            if piece == PIECE_FD:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_FC:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VC:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VD:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VB:
-                                actions.append((i, j, True))
-                    
-                    elif i != 0 and i != n - 1:
-                        if j != 0 and j != n - 1:
-                            # not a corner!
-                            continue
-                        if j == 0:
-                            if piece == PIECE_FE:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BC:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BB:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_BE:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VC:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VE:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_LH:
-                                actions.append((i, j, True))
-                        elif j == n - 1:
-                            if piece == PIECE_FD:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BC:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_BB:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BD:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VB:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VD:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_LH:
-                                actions.append((i, j, True))
-                    
-                    elif i == n - 1:
-                        if j == 0:
-                            if piece == PIECE_FE:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_FB:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VC:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VE:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VB:
-                                actions.append((i, j, False))
-                        elif j != 0 and j != n - 1:
-                            if piece == PIECE_FB:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_BE:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_BD:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_BB:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VB:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VE:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_LV:
-                                actions.append((i, j, True))
-                        elif j == n - 1:
-                            if piece == PIECE_FB:
-                                actions.append((i, j, True))
-                            elif piece == PIECE_FD:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VD:
-                                actions.append((i, j, False))
-                            elif piece == PIECE_VB:
-                                actions.append((i, j, True))
-                                actions.append((i, j, True))
-                            elif piece == PIECE_VE:
-                                actions.append((i, j, True))
+        piece = state.board.get_piece(row, col)
+        p = piece.get_piece_value()
+        actions = []
+
+        if row == 0:
+            if col == 0:
+                if p == PIECE_FD:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FB:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VB:
+                    actions.append((row, col, ROTATION_NONE))
+                state.col = 1
+            elif col != 0 and col != n - 1:
+                if p == PIECE_FD:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FE:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FB:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_BB:
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VB:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VE:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_LH:
+                    actions.append((row, col, ROTATION_NONE))
+                state.col += 1
+            elif col == n - 1:
+                if p == PIECE_FB:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FE:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VE:
+                    actions.append((row, col, ROTATION_NONE))
+                state.row += 1
+                state.col = 0
+
+        elif row != 0 and row != n - 1:
+            if col == 0:
+                if p == PIECE_FD:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FC:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FB:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_BD:
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VD:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VB:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_LV:
+                    actions.append((row, col, ROTATION_NONE))
+                state.col = 1
+            elif col != 0 and col != n - 1:
+                if p[0] == PIECE_TYPE_F or p[0] == PIECE_TYPE_B or p[0] == PIECE_TYPE_V:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                else:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                state.col += 1
+            elif col == n - 1:
+                if p == PIECE_FB:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FE:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FC:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_BE:
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VE:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VC:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_LV:
+                    actions.append((row, col, ROTATION_NONE))
+                state.row += 1
+                state.col = 0
+
+        elif row == n - 1:
+            if col == 0:
+                if p == PIECE_FD:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FC:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VD:
+                    actions.append((row, col, ROTATION_NONE))
+                state.col = 1
+            elif col != 0 and col != n - 1:
+                if p == PIECE_FD:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FE:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_180))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FC:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_BC:
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VC:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VD:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_LH:
+                    actions.append((row, col, ROTATION_NONE))
+                state.col += 1
+            elif col == n - 1:
+                if p == PIECE_FC:
+                    actions.append((row, col, ROTATION_90_COUNTER_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_FE:
+                    actions.append((row, col, ROTATION_90_CLOCKWISE))
+                    actions.append((row, col, ROTATION_NONE))
+                elif p == PIECE_VC:
+                    actions.append((row, col, ROTATION_NONE))
 
         return actions
 
     def result(self, state: PipeManiaState, action):
-        """Returns the state resulting from executing the 'action' on 'state' passed as an argument.
-        The action to be executed must be one of those present in the list obtained by executing self.actions(state)."""
-        board_cp = copy.deepcopy(state.board)
-
-        if isinstance(action, list):
-            for a in action:
-                board_cp.rotate_one_piece(a[0], a[1], a[2])
-        else:
-            board_cp.rotate_one_piece(action[0], action[1], action[2])
-
-        board_cp.board_status = BOARD_ORGANIZED_CORNERS
-        return PipeManiaState(board_cp)
-
+        new_board = deepcopy(state.board)
+        new_board.execute_action(action[0], action[1], action[2])
+        return PipeManiaState(new_board, state.row, state.col)
 
     def goal_test(self, state: PipeManiaState):
-        """Returns True if and only if the state passed as an argument is an objective state.
-        You must check that all positions on the board are filled according to the rules of the problem."""
-        
         n = state.board.len
 
         for i in range(n):
@@ -404,113 +511,133 @@ class PipeMania(Problem):
                         if piece in hasUpConnections or piece in hasLeftConnections:
                             return False
 
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
 
-                        elif piece in hasDownConnections:
+                        if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
-                    
                     elif j != 0 and j != n - 1:
                         if piece in hasUpConnections:
                             return False
 
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
 
-                        elif piece in hasDownConnections:
+                        if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
-                    
+                        
+                        if piece in hasLeftConnections:
+                            if state.board.get_value(i, j - 1) not in LeftConnections:
+                                return False
                     elif j == n - 1:
                         if piece in hasUpConnections or piece in hasRightConnections:
                             return False
 
-                        elif piece in hasDownConnections:
+                        if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
-
 
                 elif i != 0 and i != n - 1:
                     if j == 0:
                         if piece in hasLeftConnections:
                             return False
                         
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
                         
-                        elif piece in hasDownConnections:
+                        if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
-                    
+                        
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
                     elif j == n - 1:
                         if piece in hasRightConnections:
                             return False
                         
-                        elif piece in hasDownConnections:
+                        if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
-
+                        
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
+                        
+                        if piece in hasLeftConnections:
+                            if state.board.get_value(i, j - 1) not in LeftConnections:
+                                return False
                     else:
                         if piece in hasDownConnections:
                             if state.board.get_value(i + 1, j) not in DownConnections:
                                 return False
                         
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
-                
+                        
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
+                        
+                        if piece in hasLeftConnections:
+                            if state.board.get_value(i, j - 1) not in LeftConnections:
+                                return False
 
                 elif i == n - 1:
                     if j == 0:
                         if piece in hasLeftConnections or piece in hasDownConnections:
                             return False
                         
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
-                    
+                        
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
+                        
                     elif j != 0 and j != n - 1:
                         if piece in hasDownConnections:
                             return False
-
-                        elif piece in hasRightConnections:
+                        if piece in hasRightConnections:
                             if state.board.get_value(i, j + 1) not in RightConnections:
                                 return False
-                    
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
+                        if piece in hasLeftConnections:
+                            if state.board.get_value(i, j - 1) not in LeftConnections:
+                                return False
                     elif j == n - 1:
                         if piece in hasRightConnections or piece in hasDownConnections:
                             return False
-        
+                        if piece in hasUpConnections:
+                            if state.board.get_value(i - 1, j) not in UpConnections:
+                                return False
+                        if piece in hasLeftConnections:
+                            if state.board.get_value(i, j - 1) not in LeftConnections:
+                                return False
         return True
 
     def h(self, node: Node):
-        """Heuristic function used for the A* search."""
         # TODO
         pass
-
-    # TODO: more methods?
-
 
 
 
 
 if __name__ == "__main__":
-    # TODO:
-    # Read the standard input file,
-    # Use a search technique to resolve the instance,
-    # Remove the solution from the resulting node,
-    # Print to standard output in the indicated format.
-
     # Read the grid in figure 1a:
     board = Board.parse_instance()
-    
-    print(board.adjacent_vertical_values(0, 0))
-    print(board.adjacent_horizontal_values(0, 0))
-    print(board.adjacent_vertical_values(1, 1))
-    print(board.adjacent_horizontal_values(1, 1))
+    # Create an instance of PipeMania:
+    problem = PipeMania(board)
+    # Get the solution node using depth-first search:
+    goal_node = breadth_first_tree_search(problem)
 
-
+    print(goal_node.state.board.print(), end="")
