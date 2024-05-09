@@ -64,20 +64,22 @@ DownConnections = ('FC', 'BC', 'BE', 'BD', 'VC', 'VD', 'LV')
 
 
 def preprocessing(n, board):
+    total_connections = 0
     connections = 0
+
     for i in range(n):
         for j in range(n):
             piece = board[i][j]
             piece_type = piece.value[0]
 
             if piece_type == PIECE_TYPE_F:
-                connections += 1
+                total_connections += 1
             elif piece_type == PIECE_TYPE_B:
-                connections += 3
+                total_connections += 3
             elif piece_type == PIECE_TYPE_V:
-                connections += 2
+                total_connections += 2
             elif piece_type == PIECE_TYPE_L:
-                connections += 2
+                total_connections += 2
 
             if i == 0:
                 if j == 0:
@@ -100,6 +102,8 @@ def preprocessing(n, board):
                         elif down.value[0] == PIECE_TYPE_V:
                             down.value = PIECE_VD
                             down.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FB
                 elif j != 0 and j != n - 1:
                     if piece_type == PIECE_TYPE_B or piece_type == PIECE_TYPE_L:
                         if piece_type == PIECE_TYPE_B:
@@ -128,6 +132,10 @@ def preprocessing(n, board):
                             if down.value[0] == PIECE_TYPE_F:
                                 down.value = PIECE_FC
                                 down.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FB
+                    elif piece_type == PIECE_TYPE_V and not piece.isFixed:
+                        piece.value = PIECE_VB
                 elif j == n - 1:
                     if piece_type == PIECE_TYPE_V:
                         piece.value = PIECE_VE
@@ -148,6 +156,8 @@ def preprocessing(n, board):
                         elif down.value[0] == PIECE_TYPE_V:
                             down.value = PIECE_VC
                             down.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FB
                     
             elif i != 0 and i != n - 1:
                 if j == 0:
@@ -178,6 +188,10 @@ def preprocessing(n, board):
                             if right.value[0] == PIECE_TYPE_F:
                                 right.value = PIECE_FE
                                 right.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FD
+                    elif piece_type == PIECE_TYPE_V and not piece.isFixed:
+                        piece.value = PIECE_VB
                 elif j != 0 and j != n - 1:
                     continue # not an edge piece
                 elif j == n - 1:
@@ -208,6 +222,10 @@ def preprocessing(n, board):
                             if left.value[0] == PIECE_TYPE_F:
                                 left.value = PIECE_FD
                                 left.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FE
+                    elif piece_type == PIECE_TYPE_V and not piece.isFixed:
+                        piece.value = PIECE_VE
 
             elif i == n - 1:
                 if j == 0:
@@ -230,6 +248,8 @@ def preprocessing(n, board):
                         elif up.value[0] == PIECE_TYPE_V:
                             up.value = PIECE_VB
                             up.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FC
                 elif j != 0 and j != n - 1:
                     if piece_type == PIECE_TYPE_B or piece_type == PIECE_TYPE_L:
                         if piece_type == PIECE_TYPE_B:
@@ -258,6 +278,10 @@ def preprocessing(n, board):
                             if up.value[0] == PIECE_TYPE_F:
                                 up.value = PIECE_FB
                                 up.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FC
+                    elif piece_type == PIECE_TYPE_V and not piece.isFixed:
+                        piece.value = PIECE_VC
                 elif j == n - 1:
                     if piece_type == PIECE_TYPE_V:
                         piece.value = PIECE_VC
@@ -278,6 +302,8 @@ def preprocessing(n, board):
                         elif up.value[0] == PIECE_TYPE_V:
                             up.value = PIECE_VE
                             up.isFixed = True
+                    elif piece_type == PIECE_TYPE_F and not piece.isFixed:
+                        piece.value = PIECE_FC
     while True:
         stuck = True
 
@@ -459,9 +485,328 @@ def preprocessing(n, board):
         if stuck:
             break
 
-    return connections
+    for i in range(n):
+        for j in range(n):
+            connections += get_piece_connections(i, j, n, board)
 
-    
+    return (total_connections, connections)
+
+
+
+
+
+def get_piece_connections(row, col, n, board):
+    piece = board[row][col]
+    piece_value = piece.value
+
+    if row == 0:
+        if col == 0:
+            if piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_VB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col != 0 and col != n - 1:
+            if piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_VB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VE:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LH:
+                c = 0
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col == n - 1:
+            if piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_VE:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+
+    elif row != 0 and row != n - 1:
+        if col == 0:
+            if piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_VB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VD:
+                c = 0
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BD:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LV:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col != 0 and col != n - 1:
+            if piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_VB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VE:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VD:
+                c = 0
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BB:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BD:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BE:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LH:
+                c = 0
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LV:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col == n - 1:
+            if piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_FB and board[row + 1][col].value in hasUpConnections:
+                return 1
+            elif piece_value == PIECE_VE:
+                c = 0
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BE:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LV:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row + 1][col].value in hasUpConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+
+    elif row == n - 1:
+        if col == 0:
+            if piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_VD:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col != 0 and col != n - 1:
+            if piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_FD and board[row][col + 1].value in hasLeftConnections:
+                return 1
+            elif piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_VC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_VD:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_BC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            elif piece_value == PIECE_LH:
+                c = 0
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                if board[row][col + 1].value in hasLeftConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+        elif col == n - 1:
+            if piece_value == PIECE_FC and board[row - 1][col].value in hasDownConnections:
+                return 1
+            elif piece_value == PIECE_FE and board[row][col - 1].value in hasRightConnections:
+                return 1
+            elif piece_value == PIECE_VC:
+                c = 0
+                if board[row - 1][col].value in hasDownConnections:
+                    c += 1
+                if board[row][col - 1].value in hasRightConnections:
+                    c += 1
+                return c
+            else:
+                return 0
+    return 0
+
 
 
 
@@ -473,12 +818,15 @@ class Piece:
         self.isFixed = False
 
 
+
+
+
 class Board:
-    def __init__(self, n, matrix, connections):
+    def __init__(self, n, matrix, total_connections, connections):
         self.n = n
         self.matrix = matrix
-        self.connections = 0
-        self.total_connections = connections
+        self.total_connections = total_connections
+        self.connections = connections
     
     def __repr__(self):
         result = ''
@@ -489,6 +837,72 @@ class Board:
                 else:
                     result += self.matrix[i][j].value + '\t'
         return result
+    
+    def execute_action(self, row, col, piece):
+        current_piece_connections = get_piece_connections(row, col, self.n, self.matrix)
+        current_side_connections = self.update_connections(row, col)
+
+        self.matrix[row][col].value = piece
+
+        new_piece_connections = get_piece_connections(row, col, self.n, self.matrix)
+        new_side_connections = self.update_connections(row, col)
+
+        c = self.connections - (current_piece_connections + current_side_connections[0] + current_side_connections[1] + current_side_connections[2] + current_side_connections[3]) + (new_piece_connections + new_side_connections[0] + new_side_connections[1] + new_side_connections[2] + new_side_connections[3])
+        self.connections = c
+
+
+    def update_connections(self, row, col):
+        n = self.n
+        if row == 0:
+            if col == 0:
+                left = 0
+                up = 0
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+            elif col != 0 and col != n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = 0
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+            elif col == n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = 0
+                right = 0
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+        elif row != 0 and row != n - 1:
+            if col == 0:
+                left = 0
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+            elif col != 0 and col != n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+            elif col == n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = 0
+                down = get_piece_connections(row + 1, col, n, self.matrix)
+        elif row == n - 1:
+            if col == 0:
+                left = 0
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = 0
+            elif col != 0 and col != n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = get_piece_connections(row, col + 1, n, self.matrix)
+                down = 0
+            elif col == n - 1:
+                left = get_piece_connections(row, col - 1, n, self.matrix)
+                up = get_piece_connections(row - 1, col, n, self.matrix)
+                right = 0
+                down = 0
+        return (left, up, right, down)
+
 
     @staticmethod
     def parse_instance():
@@ -501,9 +915,11 @@ class Board:
                 break
             n += 1
             matrix.append([Piece(value) for value in line])
-        
-        connections = preprocessing(n, matrix)
-        return Board(n, matrix, connections)
+
+        result = preprocessing(n, matrix)
+        return Board(n, matrix, result[0], result[1])
+
+
 
 
 
@@ -519,6 +935,7 @@ class PipeManiaState:
 
     def __lt__(self, other):
         return self.id < other.id
+
 
 
 
@@ -580,23 +997,74 @@ class PipeMania(Problem):
             elif col != 0 and col != n - 1:
                 # TODO - optimize
                 if piece_type == PIECE_TYPE_F:
-                    actions.append((row, col, PIECE_FE, row, col + 1))
-                    actions.append((row, col, PIECE_FC, row, col + 1))
-                    actions.append((row, col, PIECE_FD, row, col + 1))
-                    actions.append((row, col, PIECE_FB, row, col + 1))
+                    if state.board.matrix[row - 1][col].isFixed and state.board.matrix[row - 1][col].value in hasDownConnections and state.board.matrix[row - 1][col].value != PIECE_FB:
+                        actions.append((row, col, PIECE_FC, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row + 1][col].isFixed and state.board.matrix[row + 1][col].value in hasUpConnections and state.board.matrix[row + 1][col].value != PIECE_FC:
+                        actions.append((row, col, PIECE_FB, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col - 1].isFixed and state.board.matrix[row][col - 1].value in hasRightConnections and state.board.matrix[row][col - 1].value != PIECE_FD:
+                        actions.append((row, col, PIECE_FE, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col + 1].isFixed and state.board.matrix[row][col + 1].value in hasLeftConnections and state.board.matrix[row][col + 1].value != PIECE_FE:
+                        actions.append((row, col, PIECE_FD, row, col + 1))
+                        piece.isFixed = True
+                    else:
+                        actions.append((row, col, PIECE_FE, row, col + 1))
+                        actions.append((row, col, PIECE_FC, row, col + 1))
+                        actions.append((row, col, PIECE_FD, row, col + 1))
+                        actions.append((row, col, PIECE_FB, row, col + 1))
                 elif piece_type == PIECE_TYPE_V:
                     actions.append((row, col, PIECE_VE, row, col + 1))
                     actions.append((row, col, PIECE_VC, row, col + 1))
                     actions.append((row, col, PIECE_VD, row, col + 1))
                     actions.append((row, col, PIECE_VB, row, col + 1))
                 elif piece_type == PIECE_TYPE_B:
-                    actions.append((row, col, PIECE_BE, row, col + 1))
-                    actions.append((row, col, PIECE_BC, row, col + 1))
-                    actions.append((row, col, PIECE_BD, row, col + 1))
-                    actions.append((row, col, PIECE_BB, row, col + 1))
+                    if state.board.matrix[row - 1][col].isFixed and state.board.matrix[row - 1][col].value == PIECE_FC:
+                        actions.append((row, col, PIECE_BB, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row + 1][col].isFixed and state.board.matrix[row + 1][col].value == PIECE_FB:
+                        actions.append((row, col, PIECE_BC, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col - 1].isFixed and state.board.matrix[row][col - 1].value == PIECE_FE:
+                        actions.append((row, col, PIECE_BD, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col + 1].isFixed and state.board.matrix[row][col + 1].value == PIECE_FD:
+                        actions.append((row, col, PIECE_BE, row, col + 1))
+                        piece.isFixed = True
+                    else:
+                        actions.append((row, col, PIECE_BE, row, col + 1))
+                        actions.append((row, col, PIECE_BC, row, col + 1))
+                        actions.append((row, col, PIECE_BD, row, col + 1))
+                        actions.append((row, col, PIECE_BB, row, col + 1))
                 else:
-                    actions.append((row, col, PIECE_LH, row, col + 1))
-                    actions.append((row, col, PIECE_LV, row, col + 1))
+                    if state.board.matrix[row - 1][col].isFixed and state.board.matrix[row - 1][col].value in hasDownConnections:
+                        actions.append((row, col, PIECE_LV, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row + 1][col].isFixed and state.board.matrix[row + 1][col].value in hasUpConnections:
+                        actions.append((row, col, PIECE_LV, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col - 1].isFixed and state.board.matrix[row][col - 1].value in hasRightConnections:
+                        actions.append((row, col, PIECE_LH, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col + 1].isFixed and state.board.matrix[row][col + 1].value in hasLeftConnections:
+                        actions.append((row, col, PIECE_LH, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row - 1][col].isFixed and state.board.matrix[row - 1][col].value[0] == PIECE_TYPE_F and (state.board.matrix[row - 1][col].value == PIECE_FE or state.board.matrix[row - 1][col].value == PIECE_FD):
+                        actions.append((row, col, PIECE_LH, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row + 1][col].isFixed and state.board.matrix[row + 1][col].value[0] == PIECE_TYPE_F and (state.board.matrix[row + 1][col].value == PIECE_FE or state.board.matrix[row + 1][col].value == PIECE_FC):
+                        actions.append((row, col, PIECE_LH, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col - 1].isFixed and state.board.matrix[row][col - 1].value[0] == PIECE_TYPE_F and (state.board.matrix[row][col - 1].value == PIECE_FC or state.board.matrix[row][col - 1].value == PIECE_FB):
+                        actions.append((row, col, PIECE_LV, row, col + 1))
+                        piece.isFixed = True
+                    elif state.board.matrix[row][col + 1].isFixed and state.board.matrix[row][col + 1].value[0] == PIECE_TYPE_F and (state.board.matrix[row][col + 1].value == PIECE_FC or state.board.matrix[row][col + 1].value == PIECE_FB):
+                        actions.append((row, col, PIECE_LV, row, col + 1))
+                        piece.isFixed = True
+                    else:
+                        actions.append((row, col, PIECE_LH, row, col + 1))
+                        actions.append((row, col, PIECE_LV, row, col + 1))
             elif col == n - 1:
                 if piece_type == PIECE_TYPE_F:
                     actions.append((row, col, PIECE_FC, row + 1, 0))
@@ -628,101 +1096,14 @@ class PipeMania(Problem):
 
     def result(self, state: PipeManiaState, action):
         new_board = deepcopy(state.board)
-        new_board.matrix[action[0]][action[1]].value = action[2]
+        new_board.execute_action(action[0], action[1], action[2])
         return PipeManiaState(new_board, action[3], action[4])
 
     def goal_test(self, state: PipeManiaState):
-        n = state.board.n
-
-        for i in range(n):
-            for j in range(n):
-                if state.board.matrix[i][j].isFixed:
-                    continue
-                else:
-                    piece = state.board.matrix[i][j].value
-
-                    if i == 0:
-                        if j == 0:
-                            if piece in hasUpConnections or piece in hasLeftConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-                        elif j != 0 and j != n - 1:
-                            if piece in hasUpConnections:
-                                return False
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                        elif j == n - 1:
-                            if piece in hasUpConnections or piece in hasRightConnections:
-                                return False
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-
-                    elif i != 0 and i != n - 1:
-                        if j == 0:
-                            if piece in hasLeftConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-                        elif j != 0 and j != n - 1:
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-                        elif j == n - 1:
-                            if piece in hasRightConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasDownConnections and state.board.matrix[i + 1][j].value not in DownConnections:
-                                return False
-                    elif i == n - 1:
-                        if j == 0:
-                            if piece in hasDownConnections or piece in hasLeftConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-                        elif j != 0 and j != n - 1:
-                            if piece in hasDownConnections:
-                                return False
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-                            if piece in hasRightConnections and state.board.matrix[i][j + 1].value not in RightConnections:
-                                return False
-                        elif j == n - 1:
-                            if piece in hasDownConnections or piece in hasRightConnections:
-                                return False
-                            if piece in hasLeftConnections and state.board.matrix[i][j - 1].value not in LeftConnections:
-                                return False
-                            if piece in hasUpConnections and state.board.matrix[i - 1][j].value not in UpConnections:
-                                return False
-        return True
+        return state.board.connections == state.board.total_connections
 
     def h(self, node: Node):
-        # TODO
-        pass
+        return node.state.board.total_connections - node.state.board.connections
 
 
 
@@ -730,5 +1111,6 @@ class PipeMania(Problem):
 if __name__ == "__main__":
     board = Board.parse_instance()
     problem = PipeMania(board)
-    node = breadth_first_tree_search(problem)
+    #node = breadth_first_tree_search(problem)
+    node = greedy_search(problem, problem.h)
     print(node.state.board, end='')
