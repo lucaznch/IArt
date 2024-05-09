@@ -1,28 +1,37 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+import os
 import sys
 
-def visualizer():
-    with sys.stdin as f:
-        #Transforms the input into a grid for example, [["FC","VC"],["VC","FC"]]
-        grid = [line.strip().split("  ") for line in f] 
+def visualize_grid(images_directory='images/', figsize=(8, 8)):
+    """
+    Visualize a grid of images read from stdin.
 
-        # Assuming the images are in images directory and named 'FC.png', 'VC.png', etc.
-        path_to_images = 'images/'
+    Args:
+        images_directory (str): Directory containing the images.
+        figsize (tuple): Size of the figure (width, height).
+    """
+    grid_str = sys.stdin.read().strip()
+    rows = grid_str.split('\n')
+    grid = [row.replace('\t', ' ').split() for row in rows]  # Replace tabs with spaces and then split by spaces
 
-     
-        fig, axs = plt.subplots(len(grid), len(grid[0]), figsize=(5, 5)) 
+    num_rows = len(grid)
+    num_cols = len(grid[0])
 
-        plt.subplots_adjust(left=0, bottom=0, right=1, top=1, wspace=0, hspace=0)
-  
-        for ax in axs.flatten():
-            ax.axis('off')
+    fig, axs = plt.subplots(num_rows, num_cols, figsize=figsize)
 
-        for i, row in enumerate(grid):
-            for j, img_code in enumerate(row):
-                img_path = f"{path_to_images}{img_code}.png" 
-                img = mpimg.imread(img_path) 
-                axs[i, j].imshow(img) 
+    for i, row in enumerate(grid):
+        for j, img_code in enumerate(row):
+            img_code = img_code.strip()  # Remove leading/trailing whitespace
+            img_path = os.path.join(images_directory, f"{img_code}.png")
+            if os.path.exists(img_path):
+                img = mpimg.imread(img_path)
+                axs[i, j].imshow(img)
+                axs[i, j].axis('off')
+            else:
+                print(f"Image {img_code}.png not found.")
 
-        plt.show()  
-visualizer()
+    plt.tight_layout()
+    plt.show()
+
+visualize_grid()
