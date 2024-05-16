@@ -282,6 +282,20 @@ def number_of_orientations(numero):
         numero >>= 1
     return contagem
 
+
+def numero_orientacoes_pesado_a_tipo(numero, tipo):
+    peso = 0
+    res = number_of_orientations(numero)
+
+    if tipo == T_JUNCTION:
+        peso = 0.50
+    elif tipo == T_CONNECTION or tipo == T_TURN:
+        peso = 0.75
+    elif tipo == T_LOCK:
+        peso = 0.95
+
+    return res * peso
+
 def orientation_to_direction(orientation):
     if orientation == O_UP:
         return D_UP
@@ -302,7 +316,8 @@ def find_min(state):
         return None
     
     orientations = board_array[indices[:, 0], indices[:, 1], 4]
-    num_orientations = np.vectorize(number_of_orientations)(orientations)
+    types = board_array[indices[:, 0], indices[:, 1], 0]
+    num_orientations = np.vectorize(numero_orientacoes_pesado_a_tipo)(orientations, types)
     
     min_indices = np.where(num_orientations == np.min(num_orientations))[0]
     min_index = indices[min_indices[-1]]  # Pick the last index
@@ -720,10 +735,10 @@ class Board:
                     if void.shape[0] == 3:
                         self.fixa_por_contradicao(row, col, void)
                         fixado = 1
-                    #elif void.shape[0] == 2:
-                    #    self.reduz_possibilidades_por_contradicao(row, col, void, 2)
-                    #elif void.shape[0] == 1:
-                    #    self.reduz_possibilidades_por_contradicao(row, col, void, 3)
+                    elif void.shape[0] == 2:
+                        self.reduz_possibilidades_por_contradicao(row, col, void, 2)
+                    elif void.shape[0] == 1:
+                        self.reduz_possibilidades_por_contradicao(row, col, void, 3)
 
                 elif self.board_array[row, col, 0] == T_CONNECTION:
                     if void.shape[0] == 2 or void.shape[0] == 1:
@@ -803,9 +818,11 @@ class PipeMania(Problem):
 
         if min is None:
             return res
+        
         min_x, min_y = min
         
         actions = state.board.piece_actions(min_x, min_y)
+
         for action in actions:
             res.append((min_x, min_y, action))
 
@@ -862,8 +879,8 @@ def main():
     board = Board.parse_instance()
 
     problem = PipeMania(board)
-    node = greedy_search(problem)
-    # node = depth_first_tree_search(problem)
+    #node = greedy_search(problem)
+    node = depth_first_tree_search(problem)
     print(node.state.board, end="")
 
 if __name__ == "__main__":
