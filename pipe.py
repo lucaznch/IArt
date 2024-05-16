@@ -327,7 +327,7 @@ def find_min(state):
 
 class Board:
     def __init__(self, board_array):
-        self.board_array = board_array # 0 - tipo, 1 - orientação, 2 - é definitivo?, 3 - conexões, 4 - orientações possiveis
+        self.board_array = board_array # 0 - tipo, 1 - orientação, 2 - é definitivo?, 3 - nº fixas à volta, 4 - orientações possiveis
         self.fixed_number = 0
 
         last_fixed_number = self.fixed_number
@@ -407,25 +407,6 @@ class Board:
                 return True
 
         return False
-
-    def update_connections(self, row, col):
-        directions = directions_from_bin(self.board_array[row, col, 3])
-
-        for direction in directions:
-            self.number_of_connections -= 2
-            other_row, other_col = direction_operations[direction](row, col)
-            self.board_array[other_row, other_col, 3] = remove_direction(self.board_array[other_row, other_col, 3], inverse_direction(direction))
-
-        self.board_array[row, col, 3] = 0
-
-        for direction in (D_UP, D_DOWN, D_RIGHT, D_LEFT):
-            if self.can_emit(direction, row, col):
-                other_row, other_col = direction_operations[direction](row, col)
-                if 0 <= other_row < self.board_array.shape[0] and 0 <= other_col < self.board_array.shape[1]:
-                    if self.can_receive(direction, other_row, other_col):
-                        self.number_of_connections += 2
-                        self.board_array[row, col, 3] = add_direction(self.board_array[row, col, 3], direction)
-                        self.board_array[other_row, other_col, 3] = add_direction(self.board_array[other_row, other_col, 3], inverse_direction(direction))
 
     def rotate_piece(self, row, col, orientation):
         self.board_array[row, col, 1] = orientation
@@ -533,6 +514,14 @@ class Board:
                 if no_connected_connections == connections.shape[0]:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
+                    other_row, other_col = direction_operations[D_UP](row, col) 
+                    if 0 <= other_row:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_LEFT](row, col) 
+                    if 0 <= other_col:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
                     break
         else:
             for orientation in (O_VERTICAL, O_HORIZONTAL):
@@ -646,6 +635,8 @@ class Board:
                 if no_not_connected_connections == void.shape[0]:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
+                    
+
                     break
         else:
             for orientation in (O_VERTICAL, O_HORIZONTAL):
