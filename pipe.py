@@ -13,6 +13,8 @@ from search import (
 import numpy as np
 import copy
 
+c1, c2, c3 = (0.2668665183111806, 0.974254898065978, 0.8342164457422752)
+
 number_of_pieces = 0
 
 O_UP = np.uint8(0)
@@ -283,18 +285,21 @@ def number_of_orientations(numero):
     return contagem
 
 
-def numero_orientacoes_pesado_a_tipo(numero, tipo):
+def numero_orientacoes_pesado_a_tipo(numero, tipo, fixados_a_volta):
     peso = 0
     res = number_of_orientations(numero)
 
     if tipo == T_JUNCTION:
+        global c1
         peso = 0.50
     elif tipo == T_CONNECTION or tipo == T_TURN:
+        global c2
         peso = 0.75
     elif tipo == T_LOCK:
+        global c3
         peso = 0.95
 
-    return res * peso
+    return (res * peso) #- fixados_a_volta * 0.20
 
 def orientation_to_direction(orientation):
     if orientation == O_UP:
@@ -317,7 +322,8 @@ def find_min(state):
     
     orientations = board_array[indices[:, 0], indices[:, 1], 4]
     types = board_array[indices[:, 0], indices[:, 1], 0]
-    num_orientations = np.vectorize(numero_orientacoes_pesado_a_tipo)(orientations, types)
+    fixados_a_volta = board_array[indices[:, 0], indices[:, 1], 3]
+    num_orientations = np.vectorize(numero_orientacoes_pesado_a_tipo)(orientations, types, fixados_a_volta)
     
     min_indices = np.where(num_orientations == np.min(num_orientations))[0]
     min_index = indices[min_indices[-1]]  # Pick the last index
@@ -514,12 +520,21 @@ class Board:
                 if no_connected_connections == connections.shape[0]:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
+
                     other_row, other_col = direction_operations[D_UP](row, col) 
                     if 0 <= other_row:
                         self.board_array[other_row, other_col, 3] += 1
                     
                     other_row, other_col = direction_operations[D_LEFT](row, col) 
                     if 0 <= other_col:
+                        self.board_array[other_row, other_col, 3] += 1
+
+                    other_row, other_col = direction_operations[D_RIGHT](row, col) 
+                    if other_col < self.board_array.shape[1]:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_DOWN](row, col) 
+                    if other_row < self.board_array.shape[0]:
                         self.board_array[other_row, other_col, 3] += 1
                     
                     break
@@ -538,6 +553,23 @@ class Board:
                 if no_connected_connections == connections.shape[0]:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
+
+                    other_row, other_col = direction_operations[D_UP](row, col) 
+                    if 0 <= other_row:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_LEFT](row, col) 
+                    if 0 <= other_col:
+                        self.board_array[other_row, other_col, 3] += 1
+
+                    other_row, other_col = direction_operations[D_RIGHT](row, col) 
+                    if other_col < self.board_array.shape[1]:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_DOWN](row, col) 
+                    if other_row < self.board_array.shape[0]:
+                        self.board_array[other_row, other_col, 3] += 1
+
                     break
 
     def reduz_possibilidades(self, row, col, connections, n_possibilities):        
@@ -636,6 +668,21 @@ class Board:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
                     
+                    other_row, other_col = direction_operations[D_UP](row, col) 
+                    if 0 <= other_row:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_LEFT](row, col) 
+                    if 0 <= other_col:
+                        self.board_array[other_row, other_col, 3] += 1
+
+                    other_row, other_col = direction_operations[D_RIGHT](row, col) 
+                    if other_col < self.board_array.shape[1]:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_DOWN](row, col) 
+                    if other_row < self.board_array.shape[0]:
+                        self.board_array[other_row, other_col, 3] += 1
 
                     break
         else:
@@ -653,8 +700,25 @@ class Board:
                 if no_not_connected_connections == void.shape[0]:
                     self.board_array[row, col, 1] = orientation
                     self.board_array[row, col, 2] = 1
+
+                    other_row, other_col = direction_operations[D_UP](row, col) 
+                    if 0 <= other_row:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_LEFT](row, col) 
+                    if 0 <= other_col:
+                        self.board_array[other_row, other_col, 3] += 1
+
+                    other_row, other_col = direction_operations[D_RIGHT](row, col) 
+                    if other_col < self.board_array.shape[1]:
+                        self.board_array[other_row, other_col, 3] += 1
+                    
+                    other_row, other_col = direction_operations[D_DOWN](row, col) 
+                    if other_row < self.board_array.shape[0]:
+                        self.board_array[other_row, other_col, 3] += 1
+
                     break
- 
+
     def relax_piece_with_dependencies(self, row, col):
         if self.board_array[row, col, 2] != 1:
             connections_list = []
@@ -868,11 +932,21 @@ class PipeMania(Problem):
 
 def main():
     board = Board.parse_instance()
-
     problem = PipeMania(board)
-    #node = greedy_search(problem)
     node = depth_first_tree_search(problem)
     print(node.state.board, end="")
+
+def main2(i1, i2, i3): # para treinar o c1,c2,c3
+    global c1, c2, c3
+    print(c1, c2, c3)
+    c1, c2, c3 = i1, i2, i3
+    print(c1, c2, c3)
+
+    board = Board.parse_instance()
+    problem = PipeMania(board)
+    node = depth_first_tree_search(problem)
+    print(node.state.board, end="")
+
 
 if __name__ == "__main__":
     main()
