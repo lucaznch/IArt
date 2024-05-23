@@ -4,9 +4,7 @@ from copy import deepcopy
 from search import (
     Problem,
     Node,
-    greedy_search,
     depth_first_tree_search,
-    breadth_first_tree_search,
 )
 
 FC = np.uint8(0)
@@ -56,45 +54,6 @@ hasDownConnections = np.array([FB, BB, BE, BD, VB, VE, LV], dtype=np.uint8)
 
 
 total_pieces = 0
-total_connections = 0
-#targets = []
-
-
-
-
-
-
-def sort_targets(a, matrix):
-    n = len(a)
-    for i in range(n):
-        swapped = False
-        for j in range(0, n - i - 1):
-            if matrix[a[j][0], a[j][1]].get_possible_actions() > matrix[a[j + 1][0], a[j + 1][1]].get_possible_actions():
-                a[j], a[j + 1] = a[j + 1], a[j]
-                swapped = True
-        if not swapped:
-            break
-
-
-
-
-
-
-def get_piece_connections(row, col, n, matrix):
-    piece = matrix[row, col]
-    c = 0
-
-    if piece.value in hasLeftConnections and col > 0 and matrix[row, col - 1].value in hasRightConnections:
-        c += 1
-    if piece.value in hasUpConnections and row > 0 and matrix[row - 1, col].value in hasDownConnections:
-        c += 1
-    if piece.value in hasRightConnections and col < n - 1 and matrix[row, col + 1].value in hasLeftConnections:
-        c += 1
-    if piece.value in hasDownConnections and row < n - 1 and matrix[row + 1, col].value in hasUpConnections:
-        c += 1
-    
-    return c
-
 
 
 
@@ -985,7 +944,7 @@ def preprocessing(n, matrix):
         if done:
             break
     
-    # calculate connections of the pre-procesed board and populate the targets list
+    # determine the number of fixed pieces
     for row in range(n):
         for col in range(n):
             if matrix[row, col].isFixed:
@@ -993,11 +952,7 @@ def preprocessing(n, matrix):
 
             elif not matrix[row, col].isFixed and matrix[row, col].get_type() == TYPE_L:
                 matrix[row, col].actions = 0b1010 # for L-type pieces we consider only left (LH) and right (LV) actions are possible
-            
-            #connections += get_piece_connections(row, col, n, matrix)
-    
-    # sort_targets(targets, matrix)
-    
+
     return fixed_pieces
 
 
@@ -1269,39 +1224,6 @@ class Board:
                     up.isFixed = True
 
         return self.process_board_after_action()
-
-    def get_side_connections(self, row, col):
-        n = self.n
-
-        if col == 0:
-            left = 0
-        else:
-            left = get_piece_connections(row, col - 1, n, self.matrix)
-        
-        if row == 0:
-            up = 0
-        else:
-            up = get_piece_connections(row - 1, col, n, self.matrix)
-        
-        if col == n - 1:
-            right = 0
-        else:
-            right = get_piece_connections(row, col + 1, n, self.matrix)
-        
-        if row == n - 1:
-            down = 0
-        else:
-            down = get_piece_connections(row + 1, col, n, self.matrix)
-        
-        return left, up, right, down
-
-
-    def update_connections(self, row, col, current_piece_connections, current_left, current_up, current_right, current_down):
-        new_piece_connections = get_piece_connections(row, col, self.n, self.matrix)
-        new_left, new_up, new_right, new_down = self.get_side_connections(row, col)
-
-        c = self.connections - (current_piece_connections + current_left + current_up + current_right + current_down) + (new_piece_connections + new_left + new_up + new_right + new_down)
-        self.connections = c
 
     def process_board_after_action(self):
         matrix = self.matrix
@@ -2060,8 +1982,7 @@ class PipeMania(Problem):
 
 
     def h(self, node: Node):
-        global total_connections
-        return total_connections - node.state.board.connections
+        pass
 
 
 
@@ -2085,11 +2006,10 @@ if __name__ == "__main__":
 
     #print(board, end="")
     
-    
+    """
     #fixed_pieces = 0
     #n = board.n
     #print()
-    """
     for row in range(n):
         for col in range(n):
             if col == n - 1:
