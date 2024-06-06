@@ -379,3 +379,8 @@ FC FC FC
 <br>
 <br>
 The return value of the search functions is an object of type Node. Various information can be retrieved from the return node, for example, the final state (goal_node.state), the action that led to the final state goal_node.action, and the preceding node goal_node.parent.
+
+### 5.4 Final Implementations
+In the **main branch**, you can find the base code for the project.
+There are two implementations of the problem, one in the **gabriel branch** and another in the **jorge branch**.
+ In the **gabriel branch**, you will find my implementation for the problem.
